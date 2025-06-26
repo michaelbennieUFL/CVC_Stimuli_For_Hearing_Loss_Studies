@@ -1,7 +1,8 @@
 import math
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt, colors
+from matplotlib.cm import ScalarMappable
 from matplotlib.patches import Rectangle, Ellipse
 
 from parseVowelDistFile import parse_vowel_dist_data
@@ -92,7 +93,7 @@ def count_ellipse_intersections(df,
         if segment_intersects_ellipse(p1, p2, (cx, cy), a, b, tol=tol):
             hits.add((row["vowel"], row["group"]))
 
-    return len(hits), hits
+    return max(len(hits)-3,0), hits
 
 
 import numpy as np
@@ -301,7 +302,7 @@ def plot_intersection_heatmap(vowel_row_a,
                               df_all,
                               *,
                               which="A",           # "A", "B" or "both"
-                              cmap="viridis",
+                              cmap="turbo",
                               scale=1.0,
                               point_size=50,
                               invert_f1=True,
@@ -439,7 +440,7 @@ def plot_total_load(load_dict,
                     group="m",
                     *,
                     scale=1.0,
-                    cmap="plasma",
+                    cmap="turbo",
                     point_size=45,
                     col_wrap=4):
     """
@@ -455,6 +456,11 @@ def plot_total_load(load_dict,
                              figsize=(ncols * 4, nrows * 4),
                              squeeze=False)
 
+    all_vals = [val
+                for grid in load_dict.values()
+                for val in grid.values()]
+    vmin, vmax = min(all_vals), max(all_vals)
+
     for idx, vowel in enumerate(vowels):
         ax  = axes[idx // ncols][idx % ncols]
         row = df_g[df_g["vowel"] == vowel].iloc[0]
@@ -462,7 +468,8 @@ def plot_total_load(load_dict,
 
         xs, ys, zs = zip(*[(f1, f2, z) for (f1, f2), z in data.items()])
         sc = ax.scatter(xs, ys, c=zs, cmap=cmap,
-                        s=point_size, edgecolors="none")
+                        s=point_size, edgecolors="none",
+                        vmin=vmin, vmax=vmax)
 
         # ±scale·SD ellipse for context
         cx, cy = row["f1_mean"], row["f2_mean"]
@@ -482,8 +489,13 @@ def plot_total_load(load_dict,
     fig.subplots_adjust(right=0.78)
     cbar_ax = fig.add_axes([0.90, 0.15, 0.02, 0.7])
     # shared colour-bar
-    fig.colorbar(sc,  cax=cbar_ax,ax=axes.ravel().tolist(),
+    sm = ScalarMappable(cmap=cmap,
+                        norm=colors.Normalize(vmin=vmin, vmax=vmax))
+    sm.set_array([])  # dummy; required by colourbar
+
+    fig.colorbar(sm, cax=cbar_ax,
                  label="total intersections\n(across all other vowels)")
+
     fig.suptitle(f"Aggregated intersection load — {group} speakers",
                  fontsize=14, y=1.02)
     fig.tight_layout()
@@ -515,30 +527,34 @@ def save_load_tsv(load_dict, outfile="vowel_load_points.tsv"):
 
 
 if __name__ == '__main__':
+
+    scale=0.5
+    res = 5
     df = parse_vowel_dist_data()
     df=df[df["group"]=="m"]
     hits, hit_set = count_ellipse_intersections(
         df,
         start=(550, 1750),
         end=(462.5, 1312.5),
-        scale=1.0)  # → ±2 sd ellipses
+        scale=scale)  # → ±2 sd ellipses
     print("Number of vowels crossed:", hits)
     print("Which ones:", hit_set)
 
     row = df.loc[(df['vowel'] == 'er') & (df['group'] == 'm')].iloc[0]
 
-    points = generate_sampling_points(row, block_res=(10, 10), scale=1.0)
+
+    points = generate_sampling_points(row, block_res=(res, res), scale=scale)
     print(len(points), "points")
     print(points[:10])  # first few centre-points
     plot_ploints(row, points)
     plt.show()
 
-    row_a = df.loc[(df["vowel"] == "ae") & (df["group"] == "m")].iloc[0]
-    row_b = df.loc[(df["vowel"] == "oo") & (df["group"] == "m")].iloc[0]
+    row_a = df.loc[(df["vowel"] == "iy") & (df["group"] == "m")].iloc[0]
+    row_b = df.loc[(df["vowel"] == "ah") & (df["group"] == "m")].iloc[0]
 
     result = max_intersections_between_spaces(row_a, row_b, df,
-                                              block_res=(30, 20),
-                                              scale=1.0)
+                                              block_res=(res, res),
+                                              scale=scale)
 
     # result["A"] is a dict: {(f1c, f2c): max_hits, …}
     max_for_ih = max(result["A"].values())
@@ -546,20 +562,20 @@ if __name__ == '__main__':
 
     plot_intersection_heatmap(row_a, row_b, result, df,
                               which="both",  # or "both"
-                              scale=1.0,
-                              point_size=40)
+                              scale=scale,
+                              point_size=2)
     plt.show()
 
     load = aggregate_pairwise_load(df, group="m",
-                                   block_res=(10, 10),
-                                   scale=1.0)  # ±1 SD ellipses
+                                   block_res=(res, res),
+                                   scale=scale)  # ±1 SD ellipses
 
     save_load_tsv(load, "male_vowel_grid_load.tsv")
     report_max_per_vowel(load)
 
     plot_total_load(load, df, group="m",
-                    scale=1.0,  # use the same SD scale
-                    point_size=40,
+                    scale=scale,  # use the same SD scale
+                    point_size=20,
                     col_wrap=3)  # 3 columns per row
     plt.show()
 

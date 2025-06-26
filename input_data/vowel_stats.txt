@@ -1,0 +1,21 @@
+VOWEL   GROUP     MEAN       SD   SD/MEAN    N    MIN    MAX MEASURE     
+ i:      a      382.750   53.500     0.140   56    na     na     F1
+ i:      a     2614.630  365.080     0.140   56    na     na     F2
+ i:      a        0.084    0.023     0.274   56    na     na     Duration
+ ɪ       a      465.070   50.760     0.109   64    na     na     F1
+ ɪ       a     2177.360  169.130     0.078   64    na     na     F2
+ ɪ       a        0.100    0.040     0.400   64    na     na     Duration
+ a:      a      818.590  128.910     0.157  101    na     na     F1
+ a:      a     1366.010  117.990     0.086  101    na     na     F2
+ a:      a        0.105    0.040     0.379  101    na     na     Duration
+ æ       a      837.610  146.760     0.175   66    na     na     F1
+ æ       a     1893.620  168.130     0.089   66    na     na     F2
+ æ       a        0.102    0.034     0.338   66    na     na     Duration
+ u:      a      400.300   48.740     0.122   68    na     na     F1
+ u:      a     1653.960  345.660     0.209   68    na     na     F2
+ u:      a        0.140    0.043     0.304   68    na     na     Duration
+ ʊ       a      531.720   62.540     0.118   36    na     na     F1
+ ʊ       a     1480.170  285.530     0.193   36    na     na     F2
+ ʊ       a        0.163    0.048     0.295   36    na     na     Duration
+ ɛ       a      621.500   87.720     0.141   12    na     na     F1
+ ɛ       a     1975.500  225.786     0.114   12    na     na     F2

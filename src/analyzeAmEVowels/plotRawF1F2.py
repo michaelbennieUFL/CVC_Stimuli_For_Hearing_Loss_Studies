@@ -7,7 +7,8 @@ def plot_vowel_f1f2_gaussians(
     gender='m',
     xlim=(3200, 1000),  # F2 range (Hz), reversed for vowel space
     ylim=(900, 200),    # F1 range (Hz), reversed for vowel space
-    max_sd=5000
+    max_sd=5000,
+    scale=0.5,
 ):
     # --- Parse the file and make a DataFrame ---
     data_dict = {}
@@ -38,8 +39,8 @@ def plot_vowel_f1f2_gaussians(
     for _, row in sub.iterrows():
         ellipse = Ellipse(
             (row['f2_mean'], row['f1_mean']),
-            width=2*row['f2_sd'],
-            height=2*row['f1_sd'],
+            width=2*row['f2_sd']*scale,
+            height=2*row['f1_sd']*scale,
             edgecolor='blue', facecolor='none', lw=2, alpha=0.7
         )
         ax.add_patch(ellipse)
@@ -55,6 +56,7 @@ def plot_vowel_f1f2_gaussians(
     plt.tight_layout()
     plt.show()
 
+
 if __name__ =="__main__":
-    plot_vowel_f1f2_gaussians('../../input_data/vowelDistData.txt', gender='m', xlim=(3500, 700), ylim=(1100, 200))
-    plot_vowel_f1f2_gaussians('../../input_data/vowelDistData.txt', gender='w', xlim=(3500, 700), ylim=(1100, 200))
+    scale=0.5
+    plot_vowel_f1f2_gaussians('../../input_data/vowel_stats.txt', gender='a', xlim=(3500, 700), ylim=(1100, 200),scale=scale)

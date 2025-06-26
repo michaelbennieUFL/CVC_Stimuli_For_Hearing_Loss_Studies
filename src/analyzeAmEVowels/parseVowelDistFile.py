@@ -28,5 +28,5 @@ def parse_vowel_dist_data(file_path='../../input_data/vowelDistData.txt'):
     return df
 
 if __name__=='__main__':
-    df = parse_vowel_dist_data('../../input_data/vowelDistData.txt')
+    df = parse_vowel_dist_data('../../input_data/vowel_stats.txt')
     print(df.head())
