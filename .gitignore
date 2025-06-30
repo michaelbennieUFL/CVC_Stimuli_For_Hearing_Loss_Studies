@@ -128,7 +128,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+src/speechGeneration/.env
 .venv
 env/
 venv/

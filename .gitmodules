@@ -1,0 +1,3 @@
+[submodule "src/speechGeneration/SourceFilterNeuralFormants"]
+	path = src/speechGeneration/SourceFilterNeuralFormants
+	url = https://github.com/ljuvela/SourceFilterNeuralFormants
