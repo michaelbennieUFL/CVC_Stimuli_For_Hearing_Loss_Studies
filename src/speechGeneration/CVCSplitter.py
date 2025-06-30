@@ -226,7 +226,7 @@ def generate_splitAudio(wav_path="../../input_data/En-us-bag.wav",transcript="ba
         "UH", "UW",
     ]
     spans = get_vowel_segments(
-        "../../input_data/En-us-bag.wav",
+        wav_path,
         vowels=VOWELS,
         transcript=transcript,
         dictionary="english_us_arpa",
@@ -371,11 +371,11 @@ if __name__ == "__main__":
     # os.system(f"mfa model download acoustic english_us_arpa ")
     # os.system(f"mfa model download dictionary english_mfa")
     # os.system(f"mfa model download acoustic english_mfa")
-    # c1, v, c2= generate_splitAudio()
-    # print("saved:", c1, v, c2)
+    c1, v, c2= generate_splitAudio(transcript="bog",wav_path="./_tmp_cvc/bog/bog_base.wav")
+    print("saved:", c1, v, c2)
 
     c1, v_mod, c2 = Path("../../output_files/temp/bag_C1_20250627103235.wav"), Path("../../output_files/temp_result/bag_V_20250627103235_mod_wave_0.9901357065873746_1.0602099021363576_0.5357311238158247_1.0_1.0.wav"), Path("../../output_files/temp/bag_C2_20250627103235.wav")
-
+    exit()
     final_wav = recombine_cvc_audio(
         mod_vowel_path=v_mod,
         c1_path=c1,
