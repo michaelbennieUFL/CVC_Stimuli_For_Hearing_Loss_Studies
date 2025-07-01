@@ -9,7 +9,9 @@ import math
 from pathlib import Path
 import re, subprocess
 from typing import Iterable, Dict, List, Tuple
-
+import pydub
+from pydub import AudioSegment
+import librosa
 from praatio import textgrid as _tg_mod
 import soundfile as sf
 import numpy as np
@@ -141,6 +143,9 @@ def split_cvc_audio(
     prefix: str | None = None,
     suffix: str = "",
     clip_silence: bool = False,
+    add_noise_buffer: bool = True,
+    noise_buffer_duration: float = 0.15,
+    noise_level: float = 1e-6,
 ) -> Tuple[Path, Path, Path]:
     """
     Cut *wav_path* into three files: onset consonant(s), vowel, coda consonant(s).
@@ -190,6 +195,18 @@ def split_cvc_audio(
     sf.write(v_path,  v,  sr)
     sf.write(c2_path, c2, sr)
 
+    if add_noise_buffer:
+        # Replace v_path with a buffered version
+        tmp_v_path = v_path.with_stem(v_path.stem + "_tmp")  # temporary rename
+        v_path.rename(tmp_v_path)
+        add_audio_buffer_with_noise(
+            input_file=tmp_v_path,
+            output_file=v_path,
+            buffer_duration=noise_buffer_duration,
+            noise_level=noise_level,
+        )
+        tmp_v_path.unlink()  # clean up temp
+
     return c1_path, v_path, c2_path
 
 
@@ -206,10 +223,20 @@ def generate_convex_segment_set(segments):
 
 
 
+def add_audio_buffer_with_noise(input_file: str, output_file: str, buffer_duration: float = 0.15, noise_level: float = 1e-6):
+    y, sr = librosa.load(input_file, sr=None)
+
+    # Add low-level noise instead of zero silence
+    silence = np.random.normal(scale=noise_level, size=int(buffer_duration * sr)).astype(np.float32)
+
+    y_buffered = np.concatenate([silence, y, silence])
+    sf.write(output_file, y_buffered, sr)
+
+
 def generate_splitAudio(wav_path="../../input_data/En-us-bag.wav",transcript="bag",out_dir="../../output_files/temp",
         dictionary="english_us_arpa",
         acoustic_model="english_us_arpa",
-        pad_ms: float | Tuple[float, float] = [0.05,0],):
+        pad_ms: float | Tuple[float, float] = [0.011,0.000],):
 
 
     if isinstance(pad_ms, (int, float)):
@@ -254,111 +281,82 @@ def generate_splitAudio(wav_path="../../input_data/En-us-bag.wav",transcript="ba
 
 
 # ──────────────────────────────────────────── recombine_cvc_audio ──────────────────────────────────────────
+
+def safe_append(audio1, audio2):
+    min_duration = min(len(audio1), len(audio2))       # milliseconds
+    if min_duration < 10:                 # either part shorter than 100 ms
+        return audio1 + audio2             # no cross-fade
+    crossfade_ms = max(6, min_duration // 10)  #  ≤100 ms,  never 0
+    return audio1.append(audio2, crossfade=crossfade_ms)
+
+
+
 def recombine_cvc_audio(
     mod_vowel_path: str | Path,
     c1_path: str | Path,
     c2_path: str | Path,
     *,
-    vowel_phoneme: str = "AE",  # ARPABET by default
+    vowel_phoneme: str = "AE",
     dictionary: str = "english_us_arpa",
-    acoustic_model: str = None,
+    acoustic_model: str | None = None,
     tg_format: str = "short_textgrid",
     out_path: str | Path | None = None,
+    remove_noise_buffer: bool = True,
+    noise_buffer_duration: float = 0.15,
+    vowel_length: float = 0.16,
 ) -> Path:
     """
-    Trim silence off a *modified* vowel file with MFA and stitch it back between C1 + C2.
+    Trim (optionally) buffered noise from a modified V file and stitch it
+    back between C1 and C2.
+
+    Parameters
+    ----------
+    mod_vowel_path      : WAV file that contains the modified vowel
+    c1_path, c2_path    : WAV files for onset and coda consonants
+    vowel_phoneme       : ARPAbet label for the vowel (for MFA)
+    remove_noise_buffer : If True, strips `noise_buffer_duration` seconds
+                          from both start & end of the vowel before
+                          recombining.
+    noise_buffer_duration : Duration (seconds) of the buffer that was
+                          added earlier in `split_cvc_audio()`.
+    vowel_length   : length in seconds
     """
-    mod_vowel_path = Path(mod_vowel_path).expanduser().resolve()
-    c1_path = Path(c1_path).expanduser().resolve()
-    c2_path = Path(c2_path).expanduser().resolve()
-
-    if acoustic_model is None:
-        acoustic_model = dictionary  # default to same phone set
-
-    # Write the phoneme label into a temp transcript file
-    tmp = tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False,
-                                      dir=mod_vowel_path.parent)
-    tmp.write(vowel_phoneme.strip())
-    tmp.close()
-    transcript_path = Path(tmp.name)
-
-    tg_vowel = mod_vowel_path.with_suffix(".TextGrid")
-    cmd = [
-        "mfa", "align_one",
-        str(mod_vowel_path),
-        str(transcript_path),
-        dictionary,
-        acoustic_model,
-        str(tg_vowel),
-        "--output_format", tg_format,
-        "--clean",
-    ]
-
-    try:
-        subprocess.run(cmd, check=True)
-    finally:
-        if transcript_path.exists():
-            transcript_path.unlink()
-
-    # read alignment
-    tg = _tg_mod.openTextgrid(str(tg_vowel), includeEmptyIntervals=False)
-    phone_tier = tg.getTier("phones") if hasattr(tg, "getTier") else tg.tierDict["phones"]
-    entry = phone_tier.entries[0] if hasattr(phone_tier, "entries") else phone_tier.entryList[0]
-    v_start_s, v_end_s, _ = entry
-
-    v_audio, sr_v = sf.read(mod_vowel_path)
-    start_sample = int(round(v_start_s * sr_v))
-    end_sample = int(round(v_end_s * sr_v))
-    v_trimmed = v_audio[start_sample:end_sample]
-
-    if v_trimmed.size == 0:
-        raise RuntimeError("Forced aligner trimmed the vowel to zero length!")
-
-    if c1_path.samefile(c2_path):
-        raise ValueError("c1_path and c2_path are identical – did you pass the wrong file for C2?")
-
-    c1_audio, sr_c1 = sf.read(c1_path)
-    c2_audio, sr_c2 = sf.read(c2_path)
-
-    # helper ──────────────────────────────────────────────────────────
-    def _resample(audio: np.ndarray, sr_old: int, sr_new: int) -> np.ndarray:
-        if sr_old == sr_new:
-            return audio
-        import librosa
-        return librosa.resample(audio.T, orig_sr=sr_old, target_sr=sr_new).T
-
-    c1_audio = _resample(c1_audio, sr_c1, sr_v)
-    c2_audio = _resample(c2_audio, sr_c2, sr_v)
-
-    # make every stream 2-D: (samples, channels)
-    def _to_2d(a: np.ndarray) -> np.ndarray:
-        return a if a.ndim == 2 else a[:, None]
-
-    c1_audio = _to_2d(c1_audio)
-    v_trimmed = _to_2d(v_trimmed)
-    c2_audio = _to_2d(c2_audio)
-
-    # if channel counts differ, pick the *largest* and replicate as needed
-    n_channels = max(a.shape[1] for a in (c1_audio, v_trimmed, c2_audio))
-
-    def _match_channels(a: np.ndarray, n_out: int) -> np.ndarray:
-        if a.shape[1] == n_out:
-            return a
-        if a.shape[1] == 1:                 # mono → duplicate
-            return np.repeat(a, n_out, axis=1)
-        raise RuntimeError(f"Cannot reduce {a.shape[1]}-channel audio to {n_out} channels")
-
-    c1_audio = _match_channels(c1_audio, n_channels)
-    v_trimmed = _match_channels(v_trimmed, n_channels)
-    c2_audio = _match_channels(c2_audio, n_channels)
-
-    rebuilt = np.concatenate([c1_audio, v_trimmed, c2_audio], axis=0)
-
-    out_path = Path(out_path).expanduser().resolve() if out_path else (
-        mod_vowel_path.parent / f"{mod_vowel_path.stem}_recomb.wav"
+    # ---------------- paths & defaults ----------------
+    p_mod  = Path(mod_vowel_path).expanduser().resolve()
+    p_c1   = Path(c1_path).expanduser().resolve()
+    p_c2   = Path(c2_path).expanduser().resolve()
+    out_p  = Path(out_path).expanduser().resolve() if out_path else (
+        p_mod.parent / f"{p_mod.stem}_recomb.wav"
     )
-    sf.write(out_path, rebuilt, sr_v)
-    return out_path
+
+    audio_c1=AudioSegment.from_wav(p_c1)
+    audio_v=AudioSegment.from_wav(p_mod)
+    audio_c2=AudioSegment.from_wav(p_c2)
+
+
+    if remove_noise_buffer:
+        # Remove the noise buffer from the vowel
+        length = audio_v.duration_seconds
+        audio_v=audio_v[noise_buffer_duration*1000:length-noise_buffer_duration*1000]
+
+    if vowel_length:
+        actual_length = audio_v.duration_seconds
+        if actual_length<vowel_length:
+            raise ValueError(f"Vowel is shoter than target length: {actual_length} < {vowel_length}")
+
+        offset = (actual_length-vowel_length)/2
+        audio_v =audio_v[offset*1000:(offset+vowel_length)*1000]
+
+    audio_cv = safe_append(audio_c1, audio_v)
+    audio_cvc = safe_append(audio_cv, audio_c2)
+
+
+    audio_cvc.export(out_p, format="wav")
+
+
+
+    return out_p
+
 
 
 
@@ -374,8 +372,7 @@ if __name__ == "__main__":
     c1, v, c2= generate_splitAudio(transcript="bog",wav_path="./_tmp_cvc/bog/bog_base.wav")
     print("saved:", c1, v, c2)
 
-    c1, v_mod, c2 = Path("../../output_files/temp/bag_C1_20250627103235.wav"), Path("../../output_files/temp_result/bag_V_20250627103235_mod_wave_0.9901357065873746_1.0602099021363576_0.5357311238158247_1.0_1.0.wav"), Path("../../output_files/temp/bag_C2_20250627103235.wav")
-    exit()
+    v_mod=Path("./generated_cvc/bog/tuned_1/bog_V_20250701124115_wave_0.9866432752189519_0.6118647950981129_1.8780165791901258_1.0_1.0.wav")
     final_wav = recombine_cvc_audio(
         mod_vowel_path=v_mod,
         c1_path=c1,
@@ -383,6 +380,18 @@ if __name__ == "__main__":
         vowel_phoneme="AW",  # match the actual vowel you’re using
         out_path="bag_rebuilt.wav",
     )
+
+
+    v_mod=Path("./generated_cvc/bog/tuned_0/bog_V_20250701124311_wave_0.9820402084699846_1.0633614131975866_1.0771034908956034_1.0_1.0.wav")
+    final_wav = recombine_cvc_audio(
+        mod_vowel_path=v_mod,
+        c1_path=c1,
+        c2_path=c2,
+        vowel_phoneme="AW",  # match the actual vowel you’re using
+        out_path="bag_rebuilt2.wav",
+    )
+
+
     print("Re-created CVC saved to:", final_wav)
 
 

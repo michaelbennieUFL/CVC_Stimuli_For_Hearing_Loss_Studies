@@ -62,7 +62,7 @@ def run_hifiglot_inference(
 
 # ────────────────────────────────────────────── Adam helper ─────────────────────────────────────────
 class Adam:
-    def __init__(self, size: int, lr=0.02, beta1=0.9, beta2=0.999, eps=1e-8):
+    def __init__(self, size: int, lr=0.05, beta1=0.9, beta2=0.999, eps=1e-8):
         self.lr, self.b1, self.b2, self.eps = lr, beta1, beta2, eps
         self.m = np.zeros(size)
         self.v = np.zeros(size)
@@ -99,7 +99,7 @@ def tune_formants(
     """
     wav_file, output_dir = Path(wav_file).resolve(), Path(output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
-    console = Console()
+    console = Console(width = 160)
     target = target or {}
 
     # --- helpers ----------------------------------------------------------------
@@ -120,9 +120,10 @@ def tune_formants(
 
     # initialise scales crudely ≈ target/original
     for k, tgt in target.items():
+        if k not in FORMANT_IDX: continue
         i = FORMANT_IDX[k.lower()]
         if original[i] > 0:
-            scales[i] = np.clip(tgt / original[i], 0.5, 2.0)
+            scales[i] = np.clip(tgt / original[i], 0.4, 2.5)
 
     optimiser = Adam(size=5, lr=adam_lr)
     console.print("[bold green]Starting Adam-based formant tuning[/bold green]\n")
@@ -163,11 +164,11 @@ def tune_formants(
         table = Table(title=f"Iteration {it} – Adam")
         headers = ["", "F0", "F1", "F2", "F3", "F4", "Scale"]
         for h in headers:
-            table.add_column(h, justify="center", style="cyan", no_wrap=True)
+            table.add_column(h, min_width=8, justify="center", style="cyan", no_wrap=True)
 
         table.add_row("Original", *(fmt_val(x) for x in original), "—")
         table.add_row("Current",  *(fmt_val(x) for x in current),
-                      ", ".join(f"{s:.2f}" for s in scales))
+                      ", ".join(f"{s:.3f}" for s in scales))
         table.add_row("Target",   *(fmt_val(target.get(f"f{i}", None))
                                     for i in range(5)), "—")
         table.add_row("Ratios",   *(ratio_val(current[i], f"f{i}") for i in range(5)), "—")
@@ -177,6 +178,7 @@ def tune_formants(
         err = np.zeros(5)
         all_good = True
         for k, tgt in target.items():
+            if k not in FORMANT_IDX: continue
             idx = FORMANT_IDX[k]
             diff = current[idx] - tgt
             err[idx] = diff
@@ -189,11 +191,11 @@ def tune_formants(
             return scales.tolist(), current.tolist()
 
         # treat err/tgt as gradient (sign + magnitude), clip to ±0.5 so we don't explode
-        grad = np.clip(err / (np.array([target.get(f"f{i}", 1) for i in range(5)])), -0.5, 0.5)
+        grad = np.tanh(err / np.maximum(1, np.array([target.get(f"f{i}", 1) for i in range(5)])))
         scales = optimiser.step(scales, grad)
 
         # keep within valid band
-        scales = np.clip(scales, 0.5, 2.0)
+        scales = np.clip(scales, 0.4, 2.5)
 
     shutil.rmtree(tmp_in, ignore_errors=True)
     raise RuntimeError(
