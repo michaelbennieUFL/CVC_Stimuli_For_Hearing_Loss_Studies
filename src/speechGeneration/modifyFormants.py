@@ -3,13 +3,60 @@ import math, shutil, tempfile, os, subprocess
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
+import librosa
 import numpy as np
 import parselmouth
 from parselmouth import praat
 from rich.console import Console
 from rich.table import Table
+import soundfile as sf
+import pyloudnorm as pyln
 
 FORMANT_IDX = {"f0": 0, "f1": 1, "f2": 2, "f3": 3, "f4": 4}
+
+
+
+def calculate_rms_volume(wav_path: str | Path) -> float:
+    sound = parselmouth.Sound(str(wav_path))
+    samples = sound.values.flatten()
+    rms = np.sqrt(np.mean(samples ** 2))
+    return float(rms)
+
+
+def normalize_volume(target_wav: Path, reference_rms: float):
+    sound = parselmouth.Sound(str(target_wav))
+    samples = sound.values.flatten()
+    current_rms = np.sqrt(np.mean(samples ** 2))
+
+    # Avoid division by zero
+    if current_rms == 0:
+        return
+
+    normalization_factor = reference_rms / current_rms
+    normalized_samples = samples * normalization_factor
+
+    # Save normalized sound back
+    normalized_sound = parselmouth.Sound(normalized_samples, sampling_frequency=sound.sampling_frequency)
+    normalized_sound.save(str(target_wav), "WAV")
+
+def match_loudness(reference_wav: Path, target_wav: Path):
+    ref_data, ref_rate = sf.read(str(reference_wav))
+    tgt_data, tgt_rate = sf.read(str(target_wav))
+
+    # Resample target to match reference if needed
+    if ref_rate != tgt_rate:
+        tgt_data = librosa.resample(tgt_data.T, orig_sr=tgt_rate, target_sr=ref_rate).T
+        tgt_rate = ref_rate
+
+    # Compute loudness and normalize
+    meter = pyln.Meter(ref_rate)
+    ref_loudness = meter.integrated_loudness(ref_data)
+    tgt_loudness = meter.integrated_loudness(tgt_data)
+
+    normalized_audio = pyln.normalize.loudness(tgt_data, tgt_loudness, ref_loudness)
+
+    sf.write(str(target_wav), normalized_audio, ref_rate)
+
 
 # ───────────────────────────────────────── analyse_formants ──────────────────────────────────────────
 def analyse_formants(
@@ -158,7 +205,25 @@ def tune_formants(
         outs = [f for f in output_dir.glob("*.wav") if wav_file.stem in f.name]
         if not outs:
             raise FileNotFoundError("No output .wav produced by HiFi-Glot.")
-        current = analyse_formants(max(outs, key=lambda f: f.stat().st_mtime))[:5]
+
+        # After inference, pick the newest file:
+        outs = [f for f in output_dir.glob("*.wav") if wav_file.stem in f.name]
+        if not outs:
+            raise FileNotFoundError("No output .wav produced by HiFi-Glot.")
+
+        latest_output = max(outs, key=lambda f: f.stat().st_mtime)
+
+        # Normalize volume to match the original audio
+        original_rms = calculate_rms_volume(in_wav)
+        current_rms=calculate_rms_volume(latest_output)
+        print("Loudness ratio:(pre-norm) :",current_rms/original_rms)
+        normalize_volume(latest_output, original_rms)
+        #match_loudness(in_wav, latest_output)
+        current_rms = calculate_rms_volume(latest_output)
+        print("Loudness ratio:(pos-norm) :",current_rms/original_rms)
+
+        # Continue with current formant analysis
+        current = analyse_formants(latest_output)[:5]
 
         # ──────────────── debug table ─────────────────
         table = Table(title=f"Iteration {it} – Adam")
@@ -203,6 +268,8 @@ def tune_formants(
         f"Last formant estimate: {current.tolist()}\n"
         f"Scale factors: {scales.tolist()}"
     )
+
+
 
 
 # ──────────────────────────── quick-test invocation (remove in production) ──────────────────────────

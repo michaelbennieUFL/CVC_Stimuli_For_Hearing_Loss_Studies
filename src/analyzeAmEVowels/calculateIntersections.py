@@ -528,10 +528,10 @@ def save_load_tsv(load_dict, outfile="vowel_load_points.tsv"):
 
 if __name__ == '__main__':
 
-    scale=0.5
+    scale=0.8
     res = 5
-    df = parse_vowel_dist_data()
-    df=df[df["group"]=="m"]
+    df = parse_vowel_dist_data('../../input_data/vowel_stats.txt')
+    df=df[df["group"]=="cbm"]
     hits, hit_set = count_ellipse_intersections(
         df,
         start=(550, 1750),
@@ -540,7 +540,7 @@ if __name__ == '__main__':
     print("Number of vowels crossed:", hits)
     print("Which ones:", hit_set)
 
-    row = df.loc[(df['vowel'] == 'er') & (df['group'] == 'm')].iloc[0]
+    row = df.loc[(df['vowel'] == 'AH') & (df['group'] == 'cbm')].iloc[0]
 
 
     points = generate_sampling_points(row, block_res=(res, res), scale=scale)
@@ -549,8 +549,8 @@ if __name__ == '__main__':
     plot_ploints(row, points)
     plt.show()
 
-    row_a = df.loc[(df["vowel"] == "iy") & (df["group"] == "m")].iloc[0]
-    row_b = df.loc[(df["vowel"] == "ah") & (df["group"] == "m")].iloc[0]
+    row_a = df.loc[(df["vowel"] == "IY") & (df["group"] == "cbm")].iloc[0]
+    row_b = df.loc[(df["vowel"] == "AH") & (df["group"] == "cbm")].iloc[0]
 
     result = max_intersections_between_spaces(row_a, row_b, df,
                                               block_res=(res, res),
@@ -566,7 +566,7 @@ if __name__ == '__main__':
                               point_size=2)
     plt.show()
 
-    load = aggregate_pairwise_load(df, group="m",
+    load = aggregate_pairwise_load(df, group="cbm",
                                    block_res=(res, res),
                                    scale=scale)  # ±1 SD ellipses
 

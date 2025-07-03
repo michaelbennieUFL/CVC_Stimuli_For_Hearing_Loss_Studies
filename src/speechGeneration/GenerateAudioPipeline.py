@@ -36,6 +36,9 @@ from pydub import AudioSegment
 from CVCSplitter import generate_splitAudio, recombine_cvc_audio
 from elevenAudioGeneration import PhonemeTTSEngine
 from modifyFormants import tune_formants
+from src.analyzeAmEVowels.parseVowelDistFile import parse_vowel_dist_data
+
+
 
 # ────────────────────────────────────────────────────────────────────────────
 # constants & small helpers
@@ -277,8 +280,8 @@ def generate_cvc_dataset(
             vowel_phoneme=vowel,
             targets=specs,
             dest_dir=dest_dir,
-            tolerance=8,
-            max_iters=70,
+            tolerance=16,
+            max_iters=100,
         )
 
         # ————————————————— 4. create discordant stereo pairs —————————————
@@ -291,6 +294,45 @@ def generate_cvc_dataset(
 # ────────────────────────────────────────────────────────────────────────────
 # CLI quick‑start (optional) — unchanged except for sample targets
 # ────────────────────────────────────────────────────────────────────────────
+
+
+def generate_vowel_target_list(vowel_df, target_vowels, f0, f3, f4, group='overall'):
+    """
+    Generate a list of vowel targets using f1 and f2 values from vowel_df
+    and fixed values for f0, f3, and f4.
+
+    Args:
+        vowel_df (pd.DataFrame): DataFrame with vowel formant statistics.
+        target_vowels (list): List of vowel labels (e.g., ["IY", "EH"]).
+        f0 (float): Fixed F0 value.
+        f3 (float): Fixed F3 value.
+        f4 (float): Fixed F4 value.
+        group (str): Group name (default = 'overall').
+
+    Returns:
+        List[Dict]: List of target dictionaries with label, f0, f1, f2, f3, f4.
+    """
+    target_list = []
+
+    for vowel in target_vowels:
+        row = vowel_df[(vowel_df['vowel'] == vowel) & (vowel_df['group'] == group)]
+        if not row.empty:
+            f1 = row['f1_mean'].values[0]
+            f2 = row['f2_mean'].values[0]
+            target_list.append({
+                "label": vowel,
+                "f0": f0,
+                "f1": f1,
+                "f2": f2,
+                "f3": f3,
+                "f4": f4
+            })
+        else:
+            print(f"Warning: Vowel '{vowel}' not found in group '{group}'.")
+
+    return target_list
+
+
 if __name__ == "__main__":
     import json
     from dotenv import load_dotenv, find_dotenv
@@ -305,17 +347,19 @@ if __name__ == "__main__":
 
     # ★ 2. define your input set + targets ★
     items = [
-        ("B AA G", "bog"),
+        ("B AE G", "bag"),
     ]
+    vowel_df=parse_vowel_dist_data(file_path='../../input_data/vowel_stats.txt')
 
     targets = {
-        "AA": [
-            {"label": "IH", "f0": 173, "f1": 451, "f2": 2063, "f3": 2919,"f4": 3565},  # big
-            {"label": "EH", "f0": 173, "f1": 575, "f2": 1959, "f3": 2818,"f4": 3565},  # beg
-            {"label": "AE", "f0": 173, "f1": 693, "f2": 1933, "f3": 2763,"f4": 3565},  # bag
-            {"label": "UH", "f0": 173, "f1": 462, "f2": 1450, "f3": 2726,"f4": 3565},  # bug
-            {"label": "AO", "f0": 173, "f1": 817, "f2": 1259, "f3": 2647,"f4": 3565},  # bog
-        ],
+        "AE": generate_vowel_target_list(
+            vowel_df,
+            target_vowels=["IY", "EY", "IH", "EH", "AE", "AH"],
+            f0=173,
+            f3=2726,
+            f4=3565,
+            group="f"
+        )
     }
 
     # ★ 3. run generation ★

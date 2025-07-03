@@ -1,3 +1,6 @@
 [submodule "src/speechGeneration/SourceFilterNeuralFormants"]
 	path = src/speechGeneration/SourceFilterNeuralFormants
 	url = https://github.com/ljuvela/SourceFilterNeuralFormants
+[submodule "src/speechGeneration/AdEMAMix-Optimizer-Pytorch"]
+	path = src/speechGeneration/AdEMAMix-Optimizer-Pytorch
+	url = https://github.com/nanowell/AdEMAMix-Optimizer-Pytorch

@@ -19,3 +19,98 @@ VOWEL   GROUP     MEAN       SD   SD/MEAN    N    MIN    MAX MEASURE
  ʊ       a        0.163    0.048     0.295   36    na     na     Duration
  ɛ       a      621.500   87.720     0.141   12    na     na     F1
  ɛ       a     1975.500  225.786     0.114   12    na     na     F2
+
+IY       f       327.000    41.000      0.125   na    na    na     F1
+IY       f      2991.000   131.000      0.044   na    na    na     F2
+IH       f       502.000    22.000      0.044   na    na    na     F1
+IH       f      2357.000    77.000      0.033   na    na    na     F2
+EY       f       405.000    22.000      0.054   na    na    na     F1
+EY       f      2792.000   143.000      0.051   na    na    na     F2
+EH       f       687.000    74.000      0.108   na    na    na     F1
+EH       f      2160.000   113.000      0.052   na    na    na     F2
+AE       f       983.000    69.000      0.070   na    na    na     F1
+AE       f      1884.000   201.000      0.107   na    na    na     F2
+AA       f       817.000    78.000      0.095   na    na    na     F1
+AA       f      1259.000    77.000      0.061   na    na    na     F2
+UH       f       542.000    41.000      0.076   na    na    na     F1
+UH       f      1699.000   202.000      0.119   na    na    na     F2
+UW       f       385.000    29.000      0.075   na    na    na     F1
+UW       f      1450.000   215.000      0.148   na    na    na     F2
+AH       f      640.180   42.380     0.067   na    na    na     F1
+AH       f     1590.900  138.440     0.087   na    na    na     F2
+AH       f        0.095    0.025     0.263   na    na    na     Duration
+OW       f      457.120   42.380     0.093   na    na    na     F1
+OW       f     1097.740  138.440     0.126   na    na    na     F2
+OW       f        0.156    0.040     0.256   na    na    na     Duration
+
+ e       m       404.000    42.000      0.104   na    na    na     F1
+ e       m      2217.000   192.000      0.087   na    na    na     F2
+IY       m       290.000    10.000      0.034   na    na    na     F1
+IY       m      2346.000   188.000      0.080   na    na    na     F2
+IH       m       441.000    34.000      0.077   na    na    na     F1
+IH       m      1942.000   167.000      0.086   na    na    na     F2
+EH       m       556.000    34.000      0.061   na    na    na     F1
+EH       m      1791.000   133.000      0.074   na    na    na     F2
+AE       m       703.000    76.000      0.108   na    na    na     F1
+AE       m      1622.000    56.000      0.035   na    na    na     F2
+AA       m       679.000    43.000      0.063   na    na    na     F1
+AA       m      1091.000    35.000      0.032   na    na    na     F2
+UH       m       465.000    31.000      0.067   na    na    na     F1
+UH       m      1444.000   190.000      0.132   na    na    na     F2
+UW       m       324.000    32.000      0.099   na    na    na     F1
+UW       m      1223.000    95.000      0.078   na    na    na     F2
+AH      m      629.840    81.000    0.129      6     467     791 F1
+AH      m     1471.592    76.000    0.052      6    1319    1623 F2
+
+IY    cs       267.000   28.000    0.105     10     na     na   F1
+IY    cs      2407.000  235.000    0.098     10    na    na F2
+IY    cs      3184.000  278.000    0.087     10    na    na F3
+IH    cs       449.000   47.000    0.105     10     na     na   F1
+IH    cs      1912.000   96.000    0.050     10    na    na F2
+IH    cs      2642.000  119.000    0.045     10    na    na F3
+EH    cs       633.000   63.000    0.100     10     na     na   F1
+EH    cs      1737.000   99.000    0.057     10    na    na F2
+EH    cs      2627.000  112.000    0.043     10    na    na F3
+AE    cs       721.000   63.000    0.087     10     na     na   F1
+AE    cs      1711.000   89.000    0.052     10    na    na F2
+AE    cs      2537.000  124.000    0.049     10    na    na F3
+AA    cs       807.000   81.000    0.100     10     na     na   F1
+AA    cs      1343.000   76.000    0.057     10    na    na F2
+AA    cs      2538.000  149.000    0.059     10    na    na F3
+UH    cs       487.000   58.000    0.119     10     na     na   F1
+UH    cs      1322.000  115.000    0.087     10    na    na F2
+UH    cs      2394.000  142.000    0.059     10    na    na F3
+UW    cs       293.000   33.000    0.113     10     na     na   F1
+UW    cs       969.000  152.000    0.157     10     na    na    F2
+UW    cs      2331.000  176.000    0.076     10    na    na F3
+AH    cs       665.000   51.000    0.077     10     na     na   F1
+AH    cs      1255.000   98.000    0.078     10    na    na F2
+AH    cs      2601.000  146.000    0.056     10    na    na F3
+
+
+IY   cbm  278.500  23.621    0.085 20  na  na      F1
+IY   cbm 2376.500 209.476    0.088 20  na  na      F2
+IH   cbm  445.000  40.135    0.090 20  na  na      F1
+IH   cbm 1927.000 133.465    0.069 20  na  na      F2
+EH   cbm  594.500  63.150    0.106 20  na  na      F1
+EH   cbm 1764.000 117.426    0.067 20  na  na      F2
+AE   cbm  712.000  68.566    0.096 20  na  na      F1
+AE   cbm 1666.500  85.569    0.051 20  na  na      F2
+AA   cbm  743.000  91.078    0.123 20  na  na      F1
+AA   cbm 1217.000 141.520    0.116 20  na  na      F2
+UH   cbm  476.000  46.648    0.098 20  na  na      F1
+UH   cbm 1383.000 165.171    0.119 20  na  na      F2
+UW   cbm  308.500  35.409    0.115 20  na  na      F1
+UW   cbm 1096.000 179.435    0.164 20  na  na      F2
+AH   cbm  651.815  63.692    0.098 16  na  na      F1
+AH   cbm 1336.222 139.340    0.104 16  na  na      F2
+ EY_on   cbm  506.000  50.000    0.099 55  na  na      F1
+ AY_on   cbm  728.000  66.000    0.091 53  na  na      F1
+ AW_on   cbm  781.000  92.000    0.118 50  na  na      F1
+ OW_on   cbm  599.000  84.000    0.140 34  na  na      F1
+ OY_on   cbm  536.000  83.000    0.155 31  na  na      F1
+ EY_on   cbm 1936.000 161.000    0.083 55  na  na      F2
+ AY_on   cbm 1271.000 186.000    0.146 53  na  na      F2
+ AW_on   cbm 1447.000 208.000    0.144 50  na  na      F2
+ OW_on   cbm 1439.000 528.000    0.367 34  na  na      F2
+ OY_on   cbm 1006.000 651.000    0.647 31  na  na      F2

@@ -230,3 +230,4 @@ if __name__ == "__main__":
     filtered_word_set=filter_cmudict_words(original_word_set,unique_l2_words)
     filter_cmudict_words
     result = generateTestWordList(filtered_word_set)
+    print(result)
