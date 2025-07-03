@@ -12,6 +12,8 @@ from rich.table import Table
 import soundfile as sf
 import pyloudnorm as pyln
 
+from src.speechGeneration.SourceFilterNeuralFormants.inference_hifiglot import run_hifiglot_inference_direct
+
 FORMANT_IDX = {"f0": 0, "f1": 1, "f2": 2, "f3": 3, "f4": 4}
 
 
@@ -86,25 +88,24 @@ def analyse_formants(
 
 # ────────────────────────────────────────── HiFi-Glot wrapper ───────────────────────────────────────
 def run_hifiglot_inference(
-    input_path: str,
-    output_path: str,
-    module_path: str,
-    config: str,
-    fm_config: str,
-    checkpoint_path: str,
-    feature_scale: List[float],
+        input_path: str,
+        output_path: str,
+        module_path: str,
+        config: str,
+        fm_config: str,
+        checkpoint_path: str,
+        feature_scale: List[float],
 ):
-    cmd = [
-        "python",
-        os.path.join(module_path, "inference_hifiglot.py"),
-        "--input_path", input_path,
-        "--output_path", output_path,
-        "--config", os.path.join(module_path, config),
-        "--fm_config", os.path.join(module_path, fm_config),
-        "--checkpoint_path", os.path.join(module_path, checkpoint_path),
-        "--feature_scale", str([float(x) for x in feature_scale]),
-    ]
-    subprocess.run(cmd, check=True)
+    wav_files = [str(p) for p in Path(input_path).glob("*.wav")]
+
+    run_hifiglot_inference_direct(
+        file_list=wav_files,
+        output_path=output_path,
+        checkpoint_path=os.path.join(module_path, checkpoint_path),
+        config=os.path.join(module_path, config),
+        fm_config=os.path.join(module_path, fm_config),
+        feature_scale=feature_scale,
+    )
 
 
 # ────────────────────────────────────────────── Adam helper ─────────────────────────────────────────
