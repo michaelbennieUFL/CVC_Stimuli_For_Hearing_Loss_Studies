@@ -110,7 +110,7 @@ def run_hifiglot_inference(
 
 # ────────────────────────────────────────────── Adam helper ─────────────────────────────────────────
 class Adam:
-    def __init__(self, size: int, lr=0.05, beta1=0.9, beta2=0.999, eps=1e-8):
+    def __init__(self, size: int, lr=0.05, beta1=0.8, beta2=0.9, eps=1e-8):
         self.lr, self.b1, self.b2, self.eps = lr, beta1, beta2, eps
         self.m = np.zeros(size)
         self.v = np.zeros(size)
@@ -124,7 +124,7 @@ class Adam:
         m_hat = self.m / (1 - self.b1 ** self.t)
         v_hat = self.v / (1 - self.b2 ** self.t)
 
-        update = self.lr * m_hat / (np.sqrt(v_hat) + self.eps)
+        update = self.lr/(math.log(self.t)+1) * m_hat / (np.sqrt(v_hat) + self.eps)
         return params - update
 
 
@@ -139,7 +139,7 @@ def tune_formants(
     hifi_cfg: str = "checkpoints/HiFi-Glot/config_hifigan.json",
     fm_cfg: str = "checkpoints/HiFi-Glot/config_feature_map.json",
     ckpt: str = "checkpoints/HiFi-Glot",
-    adam_lr: float = 0.02,
+    adam_lr: float = 0.04,
 ) -> Tuple[List[float], List[float]]:
     """
     Optimise HiFi-Glot's five feature-scale factors to hit the requested formants,
