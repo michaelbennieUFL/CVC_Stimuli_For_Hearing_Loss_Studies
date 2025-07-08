@@ -104,13 +104,13 @@ UW   cbm  308.500  35.409    0.115 20  na  na      F1
 UW   cbm 1096.000 179.435    0.164 20  na  na      F2
 AH   cbm  651.815  63.692    0.098 16  na  na      F1
 AH   cbm 1336.222 139.340    0.104 16  na  na      F2
- EY_on   cbm  506.000  50.000    0.099 55  na  na      F1
- AY_on   cbm  728.000  66.000    0.091 53  na  na      F1
- AW_on   cbm  781.000  92.000    0.118 50  na  na      F1
- OW_on   cbm  599.000  84.000    0.140 34  na  na      F1
- OY_on   cbm  536.000  83.000    0.155 31  na  na      F1
- EY_on   cbm 1936.000 161.000    0.083 55  na  na      F2
- AY_on   cbm 1271.000 186.000    0.146 53  na  na      F2
- AW_on   cbm 1447.000 208.000    0.144 50  na  na      F2
- OW_on   cbm 1439.000 528.000    0.367 34  na  na      F2
- OY_on   cbm 1006.000 651.000    0.647 31  na  na      F2
+ EY_on   cbma  506.000  50.000    0.099 55  na  na      F1
+ AY_on   cbma  728.000  66.000    0.091 53  na  na      F1
+ AW_on   cbma  781.000  92.000    0.118 50  na  na      F1
+ OW_on   cbma  599.000  84.000    0.140 34  na  na      F1
+ OY_on   cbma  536.000  83.000    0.155 31  na  na      F1
+ EY_on   cbma 1936.000 161.000    0.083 55  na  na      F2
+ AY_on   cbma 1271.000 186.000    0.146 53  na  na      F2
+ AW_on   cbma 1447.000 208.000    0.144 50  na  na      F2
+ OW_on   cbma 1439.000 528.000    0.367 34  na  na      F2
+ OY_on   cbma 1006.000 651.000    0.647 31  na  na      F2

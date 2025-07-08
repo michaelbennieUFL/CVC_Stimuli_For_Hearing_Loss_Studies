@@ -236,7 +236,7 @@ def add_audio_buffer_with_noise(input_file: str, output_file: str, buffer_durati
 def generate_splitAudio(wav_path="../../input_data/En-us-bag.wav",transcript="bag",out_dir="../../output_files/temp",
         dictionary="english_us_arpa",
         acoustic_model="english_us_arpa",
-        pad_ms: float | Tuple[float, float] = [0.015,-0.005],):
+        pad_ms: float | Tuple[float, float] = [0.015,-0.01],):
 
 
     if isinstance(pad_ms, (int, float)):

@@ -13,8 +13,153 @@ import soundfile as sf
 import pyloudnorm as pyln
 from scipy.optimize import minimize
 from src.speechGeneration.SourceFilterNeuralFormants.inference_hifiglot import run_hifiglot_inference_direct
-
+from scipy.optimize import basinhopping, OptimizeResult
 FORMANT_IDX = {"f0": 0, "f1": 1, "f2": 2, "f3": 3, "f4": 4}
+
+
+
+from scipy.optimize import basinhopping, OptimizeResult
+
+# ───────────────────────────── Basin-hopping wrapper ────────────────────────────
+def refine_with_basinhopping(
+    initial_scales: np.ndarray,
+    wav_file: Path,
+    output_dir: Path,
+    target: Dict[str, float],
+    module_path: str,
+    hifi_cfg: str,
+    fm_cfg: str,
+    ckpt: str,
+    n_iter: int = 200,
+    n_iter_no_change: int = 30,
+    T: float = 1.0,
+    step_size: float = 0.08,        # ~8 % multiplicative jump in each dim
+) -> Tuple[List[float], List[float]]:
+
+    console = Console(width=160)
+    log_initial = np.log(initial_scales)
+
+    # ── custom step: multiplicative in scale-space ────────────────────────────
+    class LogStep:
+        def __init__(self, size, step):
+            self.step = step
+            self.rng = np.random.default_rng()
+            self.size = size          # number of dimensions
+        def __call__(self, x):
+            return x + self.rng.normal(0.0, self.step, size=self.size)
+
+    # ── reject moves that break the allowed scale band ────────────────────────
+    def accept_test(f_new, x_new, f_old, x_old):
+        scales = np.exp(x_new)
+
+        # Reject if out of bounds
+        if np.any(scales < 0.1) or np.any(scales > 3.5):
+            return False
+
+        # Always accept better solutions
+        if f_new <=f_old*0.99:
+            return True
+
+        # Compute relative increase in loss
+        rel_increase = (f_new - f_old*0.99) / max(1e-9, f_old*0.99)
+
+        # Acceptance probability sharply decreases as loss increases
+        prob = 0.1 * np.exp(-50 * rel_increase)
+
+        # Accept worse solution only with probability 'prob'
+        if np.random.rand() < prob:
+            return True  # accept probabilistically
+        return False  # otherwise reject
+
+
+    # ── cost wrapper that returns large finite penalty on NaN ─────────────────
+    def cost(log_scales):
+        try:
+            return formant_loss(
+                log_scales,           # the parameter vector
+                initial_scales, target,
+                wav_file, output_dir,
+                module_path, hifi_cfg, fm_cfg, ckpt
+            )
+        except Exception as e:
+            console.print(f"[red]cost() exception: {e}[/red]")
+            return 1e9
+
+    # ── rich-print callback every accepted minimum ────────────────────────────
+    def bh_callback(x, f, accepted):
+        scales = np.exp(x)
+        run_hifiglot_inference(
+            input_path=str(wav_file.parent),
+            output_path=str(output_dir),
+            module_path=module_path,
+            config=hifi_cfg,
+            fm_config=fm_cfg,
+            checkpoint_path=ckpt,
+            feature_scale=scales.tolist(),
+        )
+        latest = max(output_dir.glob("*.wav"), key=lambda p: p.stat().st_mtime)
+        current = analyse_formants(latest)[:5]
+
+        table = Table(title="Basin-hop")
+        for h in ["", "F0", "F1", "F2", "F3", "F4", "Scales"]:
+            table.add_column(h, justify="center", style="cyan", no_wrap=True)
+
+        def fmt(x):  # helper
+            return "–" if np.isnan(x) else f"{int(round(x))}"
+        table.add_row(
+            "Current", *(fmt(v) for v in current),
+            ", ".join(f"{s:.3f}" for s in scales)
+        )
+        console.print(table)
+
+    # ── local minimiser options (still L-BFGS-B) ──────────────────────────────
+    minimizer_kwargs = dict(
+        method="L-BFGS-B",
+        bounds=[(np.log(0.1), np.log(3.5))] * 5,
+        options=dict(
+            ftol=1e-6,
+            gtol=1e-5,
+            eps=0.005,          # 2 % FD step – smoother than 0.5 %
+            maxiter=80,
+        ),
+    )
+
+    res: OptimizeResult = basinhopping(
+        func=cost,
+        x0=log_initial,
+        niter=n_iter,
+        T=T,
+        stepsize=step_size,
+        minimizer_kwargs=minimizer_kwargs,
+        take_step=LogStep(5, step_size),
+        accept_test=accept_test,
+        callback=bh_callback,
+        niter_success=n_iter_no_change,
+        disp=True,
+    )
+
+    if not res.lowest_optimization_result.success:
+        raise RuntimeError(
+            f"Basin-hopping failed: {res.lowest_optimization_result.message}"
+        )
+
+    final_scales = np.exp(res.x)
+
+    # one last synthesis with the winning scales
+    run_hifiglot_inference(
+        input_path=str(wav_file.parent),
+        output_path=str(output_dir),
+        module_path=module_path,
+        config=hifi_cfg,
+        fm_config=fm_cfg,
+        checkpoint_path=ckpt,
+        feature_scale=final_scales.tolist(),
+    )
+    latest = max(output_dir.glob("*.wav"), key=lambda p: p.stat().st_mtime)
+    final_formants = analyse_formants(latest)[:5]
+
+    console.print("[bold green]Basin-hopping finished[/bold green]")
+    return final_scales.tolist(), final_formants.tolist()
 
 
 
@@ -131,8 +276,17 @@ class Adam:
         return params - step_size * m_hat / (np.sqrt(v_hat) + self.eps)
 
 
+DEFAULT_WEIGHTS = {           # emphasize the low formants
+    "f0": 20.0,
+    "f1": 10.0,
+    "f2": 5.0,
+    "f3": 1.0,
+    "f4": 1.0,
+}
+
 def formant_loss(log_scales: np.ndarray, original_scales: np.ndarray, target: Dict[str, float],
-                 in_wav: Path, output_dir: Path, module_path: str, hifi_cfg: str, fm_cfg: str, ckpt: str) -> float:
+                 in_wav: Path, output_dir: Path, module_path: str, hifi_cfg: str, fm_cfg: str, ckpt: str,     weights: Dict[str, float] = DEFAULT_WEIGHTS,     # <── NEW ARG
+                 ) -> float:
     scales = np.exp(log_scales)
 
     # Run inference with proposed scales
@@ -144,6 +298,7 @@ def formant_loss(log_scales: np.ndarray, original_scales: np.ndarray, target: Di
         fm_config=fm_cfg,
         checkpoint_path=ckpt,
         feature_scale=scales.tolist(),
+
     )
 
     # Get latest output file
@@ -159,14 +314,17 @@ def formant_loss(log_scales: np.ndarray, original_scales: np.ndarray, target: Di
     # Calculate resulting formants
     current = analyse_formants(latest_output)[:5]
 
-    # Compute squared relative error only for targets provided
-    error = 0.0
-    for k, tgt in target.items():
-        if k in FORMANT_IDX:
-            idx = FORMANT_IDX[k]
-            error += ((current[idx] - tgt) / tgt) ** 2
+    # ---------- weighted relative-squared-error -----------------------------
+    err = 0.0
+    for key, tgt in target.items():
+        if key not in FORMANT_IDX or tgt == 0:            # safety
+            continue
+        idx   = FORMANT_IDX[key]
+        rel   = (current[idx] - tgt) / tgt
+        w     = weights.get(key, 1.0)                     # default 1.0
+        err  += w * rel**2                                # weight applied
+    return err
 
-    return error
 
 
 def refine_with_lbfgs(
@@ -357,14 +515,7 @@ def tune_formants(
 
         latest_output = max(outs, key=lambda f: f.stat().st_mtime)
 
-        # Normalize volume to match the original audio
-        original_rms = calculate_rms_volume(in_wav)
-        current_rms=calculate_rms_volume(latest_output)
-        print("Loudness ratio:(pre-norm) :",current_rms/original_rms)
-        normalize_volume(latest_output, original_rms)
-        #match_loudness(in_wav, latest_output)
-        current_rms = calculate_rms_volume(latest_output)
-        print("Loudness ratio:(pos-norm) :",current_rms/original_rms)
+
 
         # Continue with current formant analysis
         current = analyse_formants(latest_output)[:5]
@@ -410,12 +561,20 @@ def tune_formants(
                 all_good = False
 
         if all_good:
+            # Normalize volume to match the original audio
+            original_rms = calculate_rms_volume(in_wav)
+            current_rms = calculate_rms_volume(latest_output)
+            print("Loudness ratio:(pre-norm) :", current_rms / original_rms)
+            normalize_volume(latest_output, original_rms)
+            # match_loudness(in_wav, latest_output)
+            current_rms = calculate_rms_volume(latest_output)
+            print("Loudness ratio:(pos-norm) :", current_rms / original_rms)
             console.print("[bold green]Target achieved![/bold green]")
 
             # Switch to LBFGS for final refinement
             try:
                 console.print("[bold blue]Starting LBFGS refinement…[/bold blue]")
-                scales, current = refine_with_lbfgs(
+                scales, current = refine_with_basinhopping(
                     initial_scales=scales,
                     wav_file=in_wav,
                     output_dir=output_dir,
@@ -424,8 +583,12 @@ def tune_formants(
                     hifi_cfg=hifi_cfg,
                     fm_cfg=fm_cfg,
                     ckpt=ckpt,
-                    max_iters_lbfgs=30
+                    n_iter=100,  # tweak to taste
+                    n_iter_no_change=10,
+                    T=0.5,  # hotter ⇒ easier to escape
+                    step_size=0.002,
                 )
+
                 print("Final scales:", scales)
                 print("Achieved:", current)
                 console.print("[bold green]LBFGS refinement completed![/bold green]")

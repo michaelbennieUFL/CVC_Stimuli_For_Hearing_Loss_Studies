@@ -354,7 +354,7 @@ if __name__ == "__main__":
     targets = {
         "AE": generate_vowel_target_list(
             vowel_df,
-            target_vowels=["IH", "EY", "IY", "EH", "AE", "AH"],
+            target_vowels=["AE",],#"IH", "EY", "IY", "EH",  "AH"],
             f0=173,
             f3=3057,
             f4=3565,
