@@ -280,8 +280,8 @@ def generate_cvc_dataset(
             vowel_phoneme=vowel,
             targets=specs,
             dest_dir=dest_dir,
-            tolerance=16,
-            max_iters=100,
+            tolerance=10,
+            max_iters=800,
         )
 
         # ————————————————— 4. create discordant stereo pairs —————————————
@@ -354,9 +354,9 @@ if __name__ == "__main__":
     targets = {
         "AE": generate_vowel_target_list(
             vowel_df,
-            target_vowels=["IY", "EY", "IH", "EH", "AE", "AH"],
+            target_vowels=["IH", "EY", "IY", "EH", "AE", "AH"],
             f0=173,
-            f3=2726,
+            f3=3057,
             f4=3565,
             group="f"
         )

@@ -138,16 +138,16 @@ def generateAllCVCFillers(word_set) -> dict:
 
 def generateAllCVC(word_set) -> dict:
     wordCategoryList = generateWordCategoryLists()
-    all_plosive_initals = {}
+    all_plosive_initals = []
 
-    for plosive in wordCategoryList["Consonants_All"]:
+    for plosive in wordCategoryList["Consonants_Voiced"]:
         plosive_initals = CMUreader.filterByLetters(word_set, [plosive])
         plosive_initals = CMUreader.filterByPhonemeCount(plosive_initals, 3, int.__eq__)
-        plosive_initals = CMUreader.filterByLetters(plosive_initals, wordCategoryList["Consonants_All"], index=-1)
+        plosive_initals = CMUreader.filterByLetters(plosive_initals, wordCategoryList["Consonants_Voiced"], index=-1)
         plosive_initals = CMUreader.filterByLetters(plosive_initals, wordCategoryList["Vowels_All"], index=-2)
         plosive_initals = CMUreader.filterBySyllableCount(plosive_initals, 1, int.__eq__)
         if plosive_initals:
-            all_plosive_initals[plosive] = plosive_initals
+            all_plosive_initals.extend(plosive_initals)
 
     return all_plosive_initals
 
@@ -174,7 +174,7 @@ def generateBisyllabicFillers(word_set) -> dict:
 def generate_markdown_table(test_word_list):
     # Define test types and map them to the dataset
     test_types = [
-        ("CVC", test_word_list["CVC"]),
+        ("Voiced CVC", test_word_list["Voiced CVC"]),
     ]
 
     # Phonemes to include as columns
@@ -199,19 +199,18 @@ def generate_markdown_table(test_word_list):
 def generateTestWordList(word_set):
     result_sets = {
 
-        "CVC": generateAllCVC(word_set),
+        "Voiced CVC": generateAllCVC(word_set),
     }
 
 
 
     # Print the results for Plosive Starts
     print("\nCVC  Tests:")
-    for plosive, words in result_sets["CVC"].items():
-        print(f"{plosive}: {len(words)} words")
+    for words in result_sets["Voiced CVC"][:10]:
+        print(f"{words}: {len(words)} words")
 
 
 
-    generate_markdown_table(result_sets)
 
     return result_sets
 

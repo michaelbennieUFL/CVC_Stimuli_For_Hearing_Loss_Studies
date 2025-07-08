@@ -281,6 +281,10 @@ def generate_splitAudio(wav_path="../../input_data/En-us-bag.wav",transcript="ba
 
 
 # ──────────────────────────────────────────── recombine_cvc_audio ──────────────────────────────────────────
+def match_rms(audio: AudioSegment, target_dBFS: float) -> AudioSegment:
+    change_dBFS = target_dBFS - audio.dBFS
+    return audio.apply_gain(change_dBFS)
+
 
 def safe_append(audio1, audio2):
     min_duration = min(len(audio1), len(audio2))       # milliseconds
@@ -303,7 +307,7 @@ def recombine_cvc_audio(
     out_path: str | Path | None = None,
     remove_noise_buffer: bool = True,
     noise_buffer_duration: float = 0.15,
-    vowel_length: float = 0.16,
+    vowel_length: float = 0.11,
 ) -> Path:
     """
     Trim (optionally) buffered noise from a modified V file and stitch it
@@ -350,8 +354,10 @@ def recombine_cvc_audio(
     audio_cv = safe_append(audio_c1, audio_v)
     audio_cvc = safe_append(audio_cv, audio_c2)
 
-
+    audio_cvc = match_rms(audio_cvc, target_dBFS=-20.0)
     audio_cvc.export(out_p, format="wav")
+
+
 
 
 

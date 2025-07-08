@@ -40,6 +40,10 @@ def generateWordCategoryLists():
     category_dict["Consonants_Stops_NONE"] = list(
         set(category_dict["Consonants_All"]) - set(category_dict["Consonants_Stops"]))
 
+    category_dict["Consonants_Voiced"] = sorted(
+        list(set(category_dict["Consonants_All"]) - set(category_dict["Consonants_Unvoiced"]))
+    )
+
     return category_dict
 
 def clean_string(text):
@@ -263,7 +267,7 @@ if __name__ == "__main__":
         print(entry)
 
 
-    print("\n\nFInding Some really long Words")
+    print("\n\nFinding Some really long Words")
     #search for really long words
     result = filterBySyllableCount(word_list, 9,operator=int.__ge__)
     for entry in result[:5]:
