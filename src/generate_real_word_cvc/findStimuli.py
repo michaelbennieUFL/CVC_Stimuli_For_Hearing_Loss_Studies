@@ -40,8 +40,8 @@ def find_c1vc2_cases(
     def _base_vowel(v: str) -> str:
         return ''.join(ch for ch in v if not ch.isdigit())
 
-    cat1 = set(category1_vowels)
-    cat2 = set(category2_vowels)
+    Outer_Category_ = set(category1_vowels)
+    Inner_Category_ = set(category2_vowels)
 
     # ------------------------------------------------------------------
     # 1) Collect all words by (C1, C2) and the vowel that sits between.
@@ -67,17 +67,17 @@ def find_c1vc2_cases(
     case1, case2, case3 = {}, {}, {}
 
     for (c1, c2), vmap in combos.items():
-        have_cat1 = cat1.issubset(vmap.keys())          # *all* Cat 1 vowels present?
-        have_cat2 = cat2.issubset(vmap.keys())          # *all* Cat 2 vowels present?
+        have_Outer_Category_ = Outer_Category_.issubset(vmap.keys())          # *all* Cat 1 vowels present?
+        have_Inner_Category_ = Inner_Category_.issubset(vmap.keys())          # *all* Cat 2 vowels present?
 
-        if have_cat1 and not have_cat2:                 # ------- Condition 1 -------
-            case1[(c1, c2)] = [vmap[v] for v in cat1]   # keep only the Cat 1 members
+        if have_Outer_Category_ and not have_Inner_Category_:                 # ------- Condition 1 -------
+            case1[(c1, c2)] = [vmap[v] for v in Outer_Category_]   # keep only the Cat 1 members
 
-        elif have_cat2 and not have_cat1:               # ------- Condition 2 -------
-            case2[(c1, c2)] = [vmap[v] for v in cat2]
+        elif have_Inner_Category_ and not have_Outer_Category_:               # ------- Condition 2 -------
+            case2[(c1, c2)] = [vmap[v] for v in Inner_Category_]
 
-        elif have_cat1 and have_cat2:                   # ------- Condition 3 -------
-            wanted = cat1 | cat2
+        elif have_Outer_Category_ and have_Inner_Category_:                   # ------- Condition 3 -------
+            wanted = Outer_Category_ | Inner_Category_
             case3[(c1, c2)] = [vmap[v] for v in wanted]
 
         # If neither condition matches (mixed / incomplete), ignore.
@@ -91,99 +91,78 @@ from collections import defaultdict
 from typing import List, Dict, Tuple
 
 # ---------------------------------------------------------------------
-#  Helper: build the (C1,C2) → {vowel: word_record} index
+# ---------------------------------------------------------------------
+#  Helper: build (C1,C2) → {vowel: word_record}
 # ---------------------------------------------------------------------
 def _index_c1vc2(cvc_word_list):
     combos = defaultdict(dict)
-
-    def _base(v):          # strip stress digits
-        return ''.join(ch for ch in v if not ch.isdigit())
+    strip = lambda v: ''.join(ch for ch in v if not ch.isdigit())
 
     for entry in cvc_word_list:
         pron = entry["pronunciation"]
         if len(pron) != 3:
             continue
-        c1, vowel, c2 = pron
-        combos[(c1, c2)][_base(vowel)] = entry   # last duplicate wins
+        c1, v, c2 = pron
+        combos[(c1, c2)][strip(v)] = entry       # last duplicate wins
     return combos
 
 
 # ---------------------------------------------------------------------
-#  Main routine (sorted & relabelled)
+#  New summariser (single row per C1–C2 with maximal coverage)
 # ---------------------------------------------------------------------
 def summarize_c1vc2_conditions(
         cvc_word_list: List[Dict[str, List[str]]],
         category1_vowels: List[str],
         category2_vowels: List[str],
-        min_inner_size: int = 2,
+        min_Inner_Category__real: int = 2,           # ← NEW
         tsv_path: str = "c1vc2_summary.tsv"
     ) -> pd.DataFrame:
 
     combos = _index_c1vc2(cvc_word_list)
-
-    cat1 = set(category1_vowels)
-    all_inner_subsets = [
-        set(s)
-        for r in range(min_inner_size, len(category2_vowels) + 1)
-        for s in itertools.combinations(category2_vowels, r)
-    ]
-
-    # mapping numeric → label and an ordering key so we can sort “Case”
-    CASE_LABEL = {1: "RW=>FW", 2: "FW=>RW", 3: "RW=>RW"}
-    CASE_ORDER = {"RW=>FW": 0, "FW=>RW": 1, "RW=>RW": 2}
+    Outer_Category_ = set(category1_vowels)
+    Inner_Category_ = set(category2_vowels)
 
     rows = []
-
     for (c1, c2), vmap in combos.items():
         have = set(vmap.keys())
 
-        outer_words = {v: vmap[v]["word"] for v in cat1 if v in vmap}
-        have_all_outer = cat1.issubset(have)
-        have_any_outer = bool(cat1 & have)
+        # keep only if at least N Cat-2 vowels present
+        present_Inner_Category_ = Inner_Category_ & have
+        if len(present_Inner_Category_) < min_Inner_Category__real:
+            continue
 
-        for inner in all_inner_subsets:
-            inner_words = {v: vmap[v]["word"] for v in inner if v in vmap}
-            have_all_inner = inner.issubset(have)
-            have_any_inner = bool(inner & have)
+        # determine Cat-1 coverage
+        present_Outer_Category_ = Outer_Category_ & have
+        if len(present_Outer_Category_) == len(Outer_Category_):
+            case = "RW_RW"
+        elif len(present_Outer_Category_) == 0:
+            case = "FW_FW"
+        else:
+            case = "RW_FW"
 
-            # decide case
-            case_num = None
-            if have_all_outer and not have_any_inner:         # RW=>FW
-                case_num = 1
-            elif have_all_inner and not have_any_outer:       # FW=>RW
-                case_num = 2
-            elif have_all_outer and have_all_inner:           # RW=>RW
-                case_num = 3
-            if case_num is None:
-                continue
+        rows.append({
+            "C1": c1,
+            "C2": c2,
+            "Case": case,
+            "OuterLen": len(present_Outer_Category_),
+            "InnerLen": len(present_Inner_Category_),
+            "Outer_Category_Vowel": ",".join(sorted(Outer_Category_)),                    # ← ALL Category 1 vowels
+            "Inner_Category_Vowel": ",".join(sorted(Inner_Category_)),                    # ← ALL Category 2 vowels
+            "Outer_Category_Present": ",".join(sorted(present_Outer_Category_)),
+            "Inner_Category_Present": ",".join(sorted(present_Inner_Category_)),
+            "Outer_Category_Words": ",".join(vmap[v]["word"] for v in sorted(present_Outer_Category_)),
+            "Inner_Category_Words": ",".join(vmap[v]["word"] for v in sorted(present_Inner_Category_)),
+        })
 
-            case_label = CASE_LABEL[case_num]
 
-            rows.append({
-                "C1": c1,
-                "C2": c2,
-                "Case": case_label,
-                "OuterLen": len(outer_words),
-                "InnerLen": len(inner_words),
-                "OuterVowels": ",".join(sorted(cat1)),
-                "InnerVowels": ",".join(sorted(inner)),
-                "OuterWords": ",".join(outer_words.get(v, "") for v in cat1),
-                "InnerWords": ",".join(inner_words.get(v, "") for v in inner)
-            })
 
-    df = pd.DataFrame(rows, columns=[
-        "C1", "C2", "Case", "OuterLen", "InnerLen",
-        "OuterVowels", "InnerVowels", "OuterWords", "InnerWords"
-    ])
-
-    # sort: C1 → C2 → Case → OuterLen → InnerLen
-    df = df.sort_values(
-        by=["C1", "C2", "Case", "OuterLen", "InnerLen"],
-        key=lambda col: col.map(CASE_ORDER) if col.name == "Case" else col
-    )
-
+    df = (pd.DataFrame(rows)
+            .sort_values(["C1", "C2", "Case"], ignore_index=True))
     df.to_csv(tsv_path, sep="\t", index=False)
     return df
+
+
+
 
 
 
@@ -201,33 +180,42 @@ if __name__ == "__main__":
 
     # ---------- Define (Cat-1, Cat-2) jobs ----------
     JOBS = [
-        ("IH_AE_vs_EY_EH_OW", ["IH", "AE"], ["EY", "EH", "OW"]),
-        ("EH_UW_vs_OW_OY_UH", ["EH", "UW"], ["OW", "OY", "UH"]),
-        ("AA_UW_vs_AH_UH",    ["AA", "UW"], ["AH", "UH"]),
-        ("IY_AE_vs_IH_EY_EH_OW", ["IY", "AE"], ["IH", "EY", "EH", "OW"]),
+        ("Job1_Inner_Category__AA_AH_UH", ["UH", "AE"], ["AA", "AH", "EH"]),
+        ("Job2_Inner_Category__AE_AH_UH", ["EH", "AA"], ["AE", "AH"]),
+        ("Job3_Inner_Category__AH_UH", ["AA", "UW"], ["AH", "UH"]),
     ]
+
 
     all_frames = []    # collect dataframes for an optional mega-table
 
-    for label, cat1, cat2 in JOBS:
-        out_file = f"{label}.tsv"
+    for label, Outer_Category_, Inner_Category_ in JOBS:
+        out_file = f"wordlist/{label}.tsv"
         print(f"→ Building {out_file} …")
 
         df = summarize_c1vc2_conditions(
             voiced_cvc,
-            category1_vowels = cat1,
-            category2_vowels = cat2,
-            min_inner_size   = 2,
+            category1_vowels = Outer_Category_,
+            category2_vowels = Inner_Category_,
+            min_Inner_Category__real=2,
             tsv_path         = out_file
         )
         df["JobLabel"] = label           # keep provenance if we merge later
         all_frames.append(df)
 
     # ---------- One combined TSV (optional) ----------
+    print("a")
     mega = (
         pd.concat(all_frames, ignore_index=True)
-          .sort_values(["JobLabel", "C1", "C2", "Case", "OuterLen", "InnerLen"])
+          .sort_values(["Case", "JobLabel", "C1", "C2", "OuterLen", "InnerLen"])
     )
-    mega.to_csv("ALL_CVC_jobs.tsv", sep="\t", index=False)
+    desired_order = [
+        "Case", "OuterLen", "InnerLen", "C1", "C2",
+        "Outer_Category_Vowel", "Inner_Category_Vowel", "Outer_Category_Present", "Inner_Category_Present",
+        "Outer_Category_Words", "Inner_Category_Words", "JobLabel"
+    ]
+
+    mega = mega[desired_order]
+
+    mega.to_csv("wordlist/ALL_CVC_jobs.tsv", sep="\t", index=False)
 
     print("All done!  Per-job TSVs plus ALL_CVC_jobs.tsv have been written.")

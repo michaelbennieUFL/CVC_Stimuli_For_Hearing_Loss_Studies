@@ -585,8 +585,8 @@ def tune_formants(
                     ckpt=ckpt,
                     n_iter=100,  # tweak to taste
                     n_iter_no_change=10,
-                    T=0.5,  # hotter ⇒ easier to escape
-                    step_size=0.002,
+                    T=0.8,  # hotter ⇒ easier to escape
+                    step_size=0.01,
                 )
 
                 print("Final scales:", scales)

@@ -121,7 +121,7 @@ def plot_vowel_gaussians_scales(
 if __name__ == "__main__":
     plot_vowel_gaussians_scales(
         '../../input_data/vowel_stats.txt',
-        gender='f',
+        gender='m',
         scales=('hz', 'bark', 'mel', 'erb'),
         scale=1
     )
@@ -133,7 +133,14 @@ if __name__ == "__main__":
     )
     plot_vowel_gaussians_scales(
         '../../input_data/vowel_stats.txt',
-        gender='cs',
+        gender='NWP_And_Citation',
+        scales=('hz', 'bark', 'mel', 'erb'),
+        scale=1
+    )
+
+    plot_vowel_gaussians_scales(
+        '../../input_data/vowel_stats.txt',
+        gender='NWP_And_Reading',
         scales=('hz', 'bark', 'mel', 'erb'),
         scale=1
     )
