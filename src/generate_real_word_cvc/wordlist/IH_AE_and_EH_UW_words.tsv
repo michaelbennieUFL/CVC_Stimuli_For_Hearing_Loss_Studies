@@ -1,0 +1,205 @@
+Input_Case	Output_Case	OuterLen	InnerLen	C1	C2	Outer_Category_Vowel	Inner_Category_Vowel	Outer_Category_Present	Inner_Category_Present	Outer_Category_Words	Inner_Category_Words	JobLabel
+RW_RW	All_Real	2	1	B	D	AE,IH	EH	AE,IH	EH	BAD,BID	BED	Job1_Inner_Category__AA_AH_UH
+RW_RW	All_Real	2	1	B	G	AE,IH	EH	AE,IH	EH	BAG,BIG	BEG	Job1_Inner_Category__AA_AH_UH
+RW_RW	All_Real	2	1	D	D	AE,IH	EH	AE,IH	EH	Dad,DID	DEAD	Job1_Inner_Category__AA_AH_UH
+RW_RW	All_Fake	2	0	B	N	AE,IH	EH	AE,IH		BAN,BIN		Job1_Inner_Category__AA_AH_UH
+RW_RW	All_Fake	2	0	D	M	AE,IH	EH	AE,IH		DAMN,DIM		Job1_Inner_Category__AA_AH_UH
+RW_RW	All_Fake	2	0	JH	M	AE,IH	EH	AE,IH		JAM,GYM		Job1_Inner_Category__AA_AH_UH
+RW_RW	All_Fake	2	0	L	M	AE,IH	EH	AE,IH		LAMB,LIMB		Job1_Inner_Category__AA_AH_UH
+RW_RW	All_Fake	2	0	L	NG	AE,IH	EH	AE,IH		LANG,LING		Job1_Inner_Category__AA_AH_UH
+RW_RW	All_Fake	2	0	R	M	AE,IH	EH	AE,IH		RAM,RIM		Job1_Inner_Category__AA_AH_UH
+RW_RW	All_Fake	2	0	D	D	EH,UW	UH	EH,UW		DEAD,DUDE		Job2_Inner_Category__AE_AH_UH
+RW_RW	All_Fake	2	0	M	N	EH,UW	UH	EH,UW		MEN,Moon		Job2_Inner_Category__AE_AH_UH
+RW_RW	All_Fake	2	0	R	D	EH,UW	UH	EH,UW		RED,RUDE		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Real	1	1	B	L	AE,IH	EH	IH	EH	Bill	Bell	Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Real	1	1	B	R	AE,IH	EH	IH	EH	BEER	BEAR	Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Real	1	1	D	G	AE,IH	EH	IH	EH	DIG	deg	Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Real	1	1	D	R	AE,IH	EH	IH	EH	DEER	DARE	Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Real	1	1	DH	N	AE,IH	EH	AE	EH	THAN	THEN	Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Real	1	1	L	D	AE,IH	EH	IH	EH	LID	LED	Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Real	1	1	M	N	AE,IH	EH	AE	EH	MAN	MEN	Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Real	1	1	R	D	AE,IH	EH	IH	EH	RID	RED	Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Real	1	1	R	R	AE,IH	EH	IH	EH	REAR	RARE	Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Real	1	1	W	L	AE,IH	EH	IH	EH	Will	WELLE	Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Real	1	1	W	N	AE,IH	EH	IH	EH	WIN	WHEN	Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Real	1	1	W	R	AE,IH	EH	IH	EH	WERE	WHERE	Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Real	1	1	B	L	EH,UW	UH	EH	UH	Bell	BULL	Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Real	1	1	W	D	EH,UW	UH	EH	UH	WED	Wood	Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Real	1	1	W	L	EH,UW	UH	EH	UH	WELLE	Wool	Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	B	B	AE,IH	EH	AE		BAB		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	B	JH	AE,IH	EH	AE		BADGE		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	B	NG	AE,IH	EH	AE		BANG		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	D	Z	AE,IH	EH	IH		DOES		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	G	D	AE,IH	EH	IH		GOOD		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	G	G	AE,IH	EH	IH		GIG		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	G	NG	AE,IH	EH	AE		GANG		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	G	R	AE,IH	EH	IH		GEAR		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	G	V	AE,IH	EH	IH		GIVE		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	JH	Z	AE,IH	EH	AE		JAZZ		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	L	B	AE,IH	EH	AE		LAB		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	L	N	AE,IH	EH	AE		Lan		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	L	V	AE,IH	EH	IH		LIVE		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	M	D	AE,IH	EH	AE		MAD		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	M	L	AE,IH	EH	IH		MILL		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	M	R	AE,IH	EH	IH		MERE		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	N	R	AE,IH	EH	IH		NEAR		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	R	B	AE,IH	EH	IH		RIB		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	R	G	AE,IH	EH	AE		RAG		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	R	JH	AE,IH	EH	IH		RIDGE		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	R	N	AE,IH	EH	AE		RAN		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	R	NG	AE,IH	EH	IH		RING		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	V	N	AE,IH	EH	AE		Van		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	W	DH	AE,IH	EH	IH		WITH		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	W	NG	AE,IH	EH	IH		WING		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	Y	R	AE,IH	EH	IH		YEAR		Job1_Inner_Category__AA_AH_UH
+RW_FW	All_Fake	1	0	B	D	EH,UW	UH	EH		BED		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	B	G	EH,UW	UH	EH		BEG		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	B	M	EH,UW	UH	UW		BOOM		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	B	R	EH,UW	UH	EH		BEAR		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	D	G	EH,UW	UH	EH		deg		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	D	L	EH,UW	UH	UW		DUAL		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	D	M	EH,UW	UH	UW		Doom		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	D	R	EH,UW	UH	EH		DARE		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	DH	M	EH,UW	UH	EH		THEM		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	DH	N	EH,UW	UH	EH		THEN		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	DH	R	EH,UW	UH	EH		THERE		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	G	N	EH,UW	UH	EH		GAIN		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	JH	L	EH,UW	UH	UW		JEWEL		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	L	D	EH,UW	UH	EH		LED		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	L	G	EH,UW	UH	EH		LEG		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	L	M	EH,UW	UH	UW		LOOM		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	L	Z	EH,UW	UH	UW		LOSE		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	M	D	EH,UW	UH	UW		MOOD		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	M	V	EH,UW	UH	UW		MOVE		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	N	N	EH,UW	UH	UW		NOON		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	N	Z	EH,UW	UH	UW		NEWS		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	R	L	EH,UW	UH	UW		RULE		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	R	M	EH,UW	UH	UW		ROOM		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	R	R	EH,UW	UH	EH		RARE		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	W	B	EH,UW	UH	EH		Web		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	W	N	EH,UW	UH	EH		WHEN		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	W	R	EH,UW	UH	EH		WHERE		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	Y	JH	EH,UW	UH	UW		HUGE		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	Y	L	EH,UW	UH	EH		YELL		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	Y	Z	EH,UW	UH	UW		USE		Job2_Inner_Category__AE_AH_UH
+RW_FW	All_Fake	1	0	Z	M	EH,UW	UH	UW		ZOOM		Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Real	0	1	DH	M	AE,IH	EH		EH		THEM	Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Real	0	1	DH	R	AE,IH	EH		EH		THERE	Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Real	0	1	G	N	AE,IH	EH		EH		GAIN	Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Real	0	1	L	G	AE,IH	EH		EH		LEG	Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Real	0	1	W	B	AE,IH	EH		EH		Web	Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Real	0	1	W	D	AE,IH	EH		EH		WED	Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Real	0	1	Y	L	AE,IH	EH		EH		YELL	Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Real	0	1	G	D	EH,UW	UH		UH		Good	Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Real	0	1	L	NG	EH,UW	UH		UH		Long	Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Real	0	1	Y	R	EH,UW	UH		UH		YOUR	Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	B	DH	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	B	M	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	B	Z	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	D	B	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	D	L	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	D	N	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	D	V	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	DH	Z	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	G	L	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	G	M	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	G	Z	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	JH	B	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	JH	D	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	JH	G	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	JH	JH	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	JH	L	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	JH	N	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	JH	R	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	L	JH	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	L	R	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	L	Z	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	M	B	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	M	G	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	M	JH	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	M	M	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	M	V	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	M	Z	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	N	D	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	N	L	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	N	M	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	N	N	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	N	V	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	N	Z	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	R	L	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	R	Z	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	V	B	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	V	G	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	V	Z	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	W	JH	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	W	M	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	W	V	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	W	Z	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	Y	JH	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	Y	N	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	Y	NG	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	Y	Z	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	Z	M	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	Z	N	AE,IH	EH					Job1_Inner_Category__AA_AH_UH
+FW_FW	All_Fake	0	0	B	B	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	B	DH	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	B	JH	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	B	N	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	B	NG	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	B	Z	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	D	B	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	D	N	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	D	V	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	D	Z	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	DH	Z	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	G	G	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	G	L	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	G	M	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	G	NG	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	G	R	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	G	V	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	G	Z	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	JH	B	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	JH	D	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	JH	G	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	JH	JH	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	JH	M	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	JH	N	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	JH	R	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	JH	Z	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	L	B	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	L	JH	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	L	N	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	L	R	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	L	V	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	M	B	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	M	G	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	M	JH	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	M	L	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	M	M	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	M	R	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	M	Z	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	N	D	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	N	L	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	N	M	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	N	R	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	N	V	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	R	B	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	R	G	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	R	JH	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	R	N	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	R	NG	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	R	Z	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	V	B	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	V	G	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	V	N	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	V	Z	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	W	DH	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	W	JH	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	W	M	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	W	NG	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	W	V	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	W	Z	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	Y	N	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	Y	NG	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
+FW_FW	All_Fake	0	0	Z	N	EH,UW	UH					Job2_Inner_Category__AE_AH_UH
