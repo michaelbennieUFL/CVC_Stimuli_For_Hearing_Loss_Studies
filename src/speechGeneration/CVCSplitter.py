@@ -236,7 +236,7 @@ def add_audio_buffer_with_noise(input_file: str, output_file: str, buffer_durati
 def generate_splitAudio(wav_path="../../input_data/En-us-bag.wav",transcript="bag",out_dir="../../output_files/temp",
         dictionary="english_us_arpa",
         acoustic_model="english_us_arpa",
-        pad_ms: float | Tuple[float, float] = [0.015,-0.01],):
+        pad_ms: float | Tuple[float, float] = [0.015,-0.008],):
 
 
     if isinstance(pad_ms, (int, float)):
@@ -307,7 +307,7 @@ def recombine_cvc_audio(
     out_path: str | Path | None = None,
     remove_noise_buffer: bool = True,
     noise_buffer_duration: float = 0.15,
-    vowel_length: float = 0.11,
+    vowel_length: float = 0.10,
 ) -> Path:
     """
     Trim (optionally) buffered noise from a modified V file and stitch it
@@ -375,19 +375,18 @@ if __name__ == "__main__":
     # os.system(f"mfa model download acoustic english_us_arpa ")
     # os.system(f"mfa model download dictionary english_mfa")
     # os.system(f"mfa model download acoustic english_mfa")
-    c1, v, c2= generate_splitAudio(transcript="bog",wav_path="./_tmp_cvc/bog/bog_base.wav")
+    c1, v, c2= generate_splitAudio(transcript="bug",wav_path="./_tmp_cvc/bug/bug_base.wav")
     print("saved:", c1, v, c2)
 
-    v_mod=Path("./generated_cvc/bog/tuned_1/bog_V_20250701124115_wave_0.9866432752189519_0.6118647950981129_1.8780165791901258_1.0_1.0.wav")
     final_wav = recombine_cvc_audio(
-        mod_vowel_path=v_mod,
+        mod_vowel_path=v,
         c1_path=c1,
         c2_path=c2,
-        vowel_phoneme="AW",  # match the actual vowel you’re using
-        out_path="bag_rebuilt.wav",
+        vowel_phoneme="AH",  # match the actual vowel you’re using
+        out_path="bug_rebuilt.wav",
     )
 
-
+    exit()
     v_mod=Path("./generated_cvc/bog/tuned_0/bog_V_20250701124311_wave_0.9820402084699846_1.0633614131975866_1.0771034908956034_1.0_1.0.wav")
     final_wav = recombine_cvc_audio(
         mod_vowel_path=v_mod,

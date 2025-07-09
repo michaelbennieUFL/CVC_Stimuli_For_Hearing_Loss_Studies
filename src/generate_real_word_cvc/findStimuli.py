@@ -163,7 +163,72 @@ def summarize_c1vc2_conditions(
 
 
 
+def summarize_c1vc2_input_output_cases(
+        cvc_word_list: List[Dict[str, List[str]]],
+        category1_vowels: List[str],          # “outer” – source/input vowels
+        category2_vowels: List[str],          # “inner” – target/output vowels
+        tsv_path: str = "c1vc2_summary.tsv"
+    ) -> pd.DataFrame:
+    """
+    Produce one row per (C1, C2) pair, labelling both the input-side
+    real/fake pattern (outer vowels) and the output-side pattern
+    (inner vowels).  No minimum-coverage filters are applied.
+    """
+    combos           = _index_c1vc2(cvc_word_list)
+    Outer_Category_  = set(category1_vowels)
+    Inner_Category_  = set(category2_vowels)
 
+    INPUT_ORDER   = ["RW_RW", "RW_FW", "FW_FW"]
+    OUTPUT_ORDER  = ["All_Real", "Mixed", "All_Fake"]
+
+    rows = []
+    for (c1, c2), vmap in combos.items():
+        have = set(vmap.keys())
+
+        # ---------- INPUT side (outer) ----------
+        present_outer = Outer_Category_ & have
+        if len(present_outer) == len(Outer_Category_):
+            input_case = "RW_RW"
+        elif len(present_outer) == 0:
+            input_case = "FW_FW"
+        else:
+            input_case = "RW_FW"
+
+        # ---------- OUTPUT side (inner) ----------
+        present_inner = Inner_Category_ & have
+        if len(present_inner) == len(Inner_Category_):
+            output_case = "All_Real"
+        elif len(present_inner) == 0:
+            output_case = "All_Fake"
+        else:
+            output_case = "Mixed"
+
+        rows.append({
+            "C1": c1,
+            "C2": c2,
+            "Input_Case":  input_case,
+            "Output_Case": output_case,
+            "OuterLen": len(present_outer),
+            "InnerLen": len(present_inner),
+            "Outer_Category_Vowel":  ",".join(sorted(Outer_Category_)),
+            "Inner_Category_Vowel":  ",".join(sorted(Inner_Category_)),
+            "Outer_Category_Present":",".join(sorted(present_outer)),
+            "Inner_Category_Present":",".join(sorted(present_inner)),
+            "Outer_Category_Words":  ",".join(vmap[v]["word"] for v in sorted(present_outer)),
+            "Inner_Category_Words":  ",".join(vmap[v]["word"] for v in sorted(present_inner)),
+        })
+
+    df = pd.DataFrame(rows)
+
+    # ----------  custom sort order ----------
+    df["Input_Case"]  = pd.Categorical(df["Input_Case"],  categories=INPUT_ORDER,  ordered=True)
+    df["Output_Case"] = pd.Categorical(df["Output_Case"], categories=OUTPUT_ORDER, ordered=True)
+
+    sort_cols = ["Input_Case", "Output_Case", "Outer_Category_Vowel", "OuterLen", "InnerLen", "C1", "C2"]
+    df = df.sort_values(sort_cols, ignore_index=True)
+
+    df.to_csv(tsv_path, sep="\t", index=False)
+    return df
 
 
 if __name__ == "__main__":
@@ -179,43 +244,61 @@ if __name__ == "__main__":
     voiced_cvc        = result_sets["Voiced CVC"]
 
     # ---------- Define (Cat-1, Cat-2) jobs ----------
-    JOBS = [
-        ("Job1_Inner_Category__AA_AH_UH", ["UH", "AE"], ["AA", "AH", "EH"]),
-        ("Job2_Inner_Category__AE_AH_UH", ["EH", "AA"], ["AE", "AH"]),
-        ("Job3_Inner_Category__AH_UH", ["AA", "UW"], ["AH", "UH"]),
-    ]
+    # JOBS = [
+    #     ("Job1_Inner_Category__AA_AH_UH", ["UH", "AE"], ["AA", "AH", "EH"]),
+    #     ("Job2_Inner_Category__AE_AH_UH", ["EH", "AA"], ["AE", "AH"]),
+    #     ("Job3_Inner_Category__AH_UH", ["AA", "UW"], ["AH", "UH"]),
+    # ]
 
+
+
+    MONOTHONG_JOBS = [
+        ("Job1_Inner_Category__AA_AH_UH", ["IH", "AE"], ["EH"]),
+        ("Job2_Inner_Category__AE_AH_UH", ["EH", "UW"], ["UH"]),
+    ]
 
     all_frames = []    # collect dataframes for an optional mega-table
 
-    for label, Outer_Category_, Inner_Category_ in JOBS:
+    for label, Outer_Category_, Inner_Category_ in MONOTHONG_JOBS:
         out_file = f"wordlist/{label}.tsv"
         print(f"→ Building {out_file} …")
 
-        df = summarize_c1vc2_conditions(
+        df = summarize_c1vc2_input_output_cases(
             voiced_cvc,
-            category1_vowels = Outer_Category_,
-            category2_vowels = Inner_Category_,
-            min_Inner_Category__real=2,
-            tsv_path         = out_file
+            category1_vowels=Outer_Category_,
+            category2_vowels=Inner_Category_,
+            tsv_path=out_file
         )
         df["JobLabel"] = label           # keep provenance if we merge later
         all_frames.append(df)
 
     # ---------- One combined TSV (optional) ----------
-    print("a")
-    mega = (
-        pd.concat(all_frames, ignore_index=True)
-          .sort_values(["Case", "JobLabel", "C1", "C2", "OuterLen", "InnerLen"])
-    )
+    print("→ Building combined summary …")
+
+    mega = pd.concat(all_frames, ignore_index=True)
+
+    # Ensure consistent category ordering for sorting
+    INPUT_ORDER  = ["RW_RW", "RW_FW", "FW_FW"]
+    OUTPUT_ORDER = ["All_Real", "Mixed", "All_Fake"]
+
+    mega["Input_Case"]  = pd.Categorical(mega["Input_Case"], categories=INPUT_ORDER, ordered=True)
+    mega["Output_Case"] = pd.Categorical(mega["Output_Case"], categories=OUTPUT_ORDER, ordered=True)
+
+    mega = mega.sort_values([
+        "Input_Case", "Output_Case", "Outer_Category_Vowel",
+        "OuterLen", "InnerLen", "C1", "C2"
+    ])
+
     desired_order = [
-        "Case", "OuterLen", "InnerLen", "C1", "C2",
-        "Outer_Category_Vowel", "Inner_Category_Vowel", "Outer_Category_Present", "Inner_Category_Present",
-        "Outer_Category_Words", "Inner_Category_Words", "JobLabel"
+        "Input_Case", "Output_Case", "OuterLen", "InnerLen", "C1", "C2",
+        "Outer_Category_Vowel", "Inner_Category_Vowel",
+        "Outer_Category_Present", "Inner_Category_Present",
+        "Outer_Category_Words", "Inner_Category_Words",
+        "JobLabel"
     ]
 
     mega = mega[desired_order]
 
     mega.to_csv("wordlist/ALL_CVC_jobs.tsv", sep="\t", index=False)
 
-    print("All done!  Per-job TSVs plus ALL_CVC_jobs.tsv have been written.")
+    print("All done! Per-job TSVs plus ALL_CVC_jobs.tsv have been written.")

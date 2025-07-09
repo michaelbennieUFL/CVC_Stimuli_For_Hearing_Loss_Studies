@@ -144,3 +144,10 @@ if __name__ == "__main__":
         scales=('hz', 'bark', 'mel', 'erb'),
         scale=1
     )
+
+    plot_vowel_gaussians_scales(
+        '../../input_data/vowel_stats.txt',
+        gender='STIMULI',
+        scales=('hz', 'bark', 'mel', 'erb'),
+        scale=1
+    )

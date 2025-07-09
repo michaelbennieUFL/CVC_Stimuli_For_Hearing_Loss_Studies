@@ -557,7 +557,7 @@ def tune_formants(
                 err[idx] = 0.0
 
 
-            if (abs(abs_diff) > tolerance and not abs(current[idx] / tgt-1) <= 0.04) and not(it >400 and abs(current[idx] / tgt-1) <= 0.02*(1+it//100)) :
+            if (abs(abs_diff) > tolerance and not abs(current[idx] / tgt-1) <= 0.05) and not(it >400 and abs(current[idx] / tgt-1) <= 0.02*(1+it//100)) :
                 all_good = False
 
         if all_good:
@@ -574,20 +574,20 @@ def tune_formants(
             # Switch to LBFGS for final refinement
             try:
                 console.print("[bold blue]Starting LBFGS refinement…[/bold blue]")
-                scales, current = refine_with_basinhopping(
-                    initial_scales=scales,
-                    wav_file=in_wav,
-                    output_dir=output_dir,
-                    target=target,
-                    module_path=module_path,
-                    hifi_cfg=hifi_cfg,
-                    fm_cfg=fm_cfg,
-                    ckpt=ckpt,
-                    n_iter=100,  # tweak to taste
-                    n_iter_no_change=10,
-                    T=0.8,  # hotter ⇒ easier to escape
-                    step_size=0.01,
-                )
+                # scales, current = refine_with_basinhopping(
+                #     initial_scales=scales,
+                #     wav_file=in_wav,
+                #     output_dir=output_dir,
+                #     target=target,
+                #     module_path=module_path,
+                #     hifi_cfg=hifi_cfg,
+                #     fm_cfg=fm_cfg,
+                #     ckpt=ckpt,
+                #     n_iter=50,  # tweak to taste
+                #     n_iter_no_change=10,
+                #     T=0.5,  # hotter ⇒ easier to escape
+                #     step_size=0.01,
+                # )
 
                 print("Final scales:", scales)
                 print("Achieved:", current)

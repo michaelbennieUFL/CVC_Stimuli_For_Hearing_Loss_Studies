@@ -347,18 +347,18 @@ if __name__ == "__main__":
 
     # ★ 2. define your input set + targets ★
     items = [
-        ("B AE G", "bag"),
+        ("B AH G", "bug"),
     ]
     vowel_df=parse_vowel_dist_data(file_path='../../input_data/vowel_stats.txt')
 
     targets = {
-        "AE": generate_vowel_target_list(
+        "AH": generate_vowel_target_list(
             vowel_df,
-            target_vowels=["AE",],#"IH", "EY", "IY", "EH",  "AH"],
-            f0=173,
-            f3=3057,
-            f4=3565,
-            group="f"
+            target_vowels=["AE","UH", "AA", "EH", ],
+            f0=99,
+            f3=2708,
+            f4=3603,
+            group="STIMULI"
         )
     }
 

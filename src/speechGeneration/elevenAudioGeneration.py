@@ -140,7 +140,7 @@ if __name__ == "__main__":
 
     tts = PhonemeTTSEngine(api_key=os.environ["ELEVENLABS_API_KEY"], voice_id=os.environ["ELEVENLABS_VOICE_ID"])
 
-    phonemes = "Y AO N"  # this should say "Zoon"
+    phonemes = "B AH G"  # this should say "Zoon"
 
     wav = tts.speak_phonemes(
         phoneme_str=phonemes,
