@@ -17,6 +17,8 @@ from praatio import textgrid as _tg_mod
 import soundfile as sf
 import numpy as np
 from datetime import datetime
+
+CROSSFADE_TIME=2
 # --------------------------------------------------------------------
 # 1. generate_textgrid  (unchanged)
 # --------------------------------------------------------------------
@@ -305,7 +307,7 @@ def safe_append(audio1: AudioSegment, audio2: AudioSegment) -> AudioSegment:
         return audio1 + audio2            # simple concat, no cross-fade
 
     min_duration = min(len(audio1), len(audio2))  # ms
-    crossfade_ms = max(3, min_duration // 20)     # 6–100 ms
+    crossfade_ms = max(CROSSFADE_TIME, min_duration // 200)     # 6–100 ms
     return audio1.append(audio2, crossfade=crossfade_ms)
 
 

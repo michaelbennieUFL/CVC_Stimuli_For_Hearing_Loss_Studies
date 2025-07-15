@@ -38,7 +38,9 @@ from CVCSplitter import generate_splitAudio, recombine_cvc_audio
 from elevenAudioGeneration import PhonemeTTSEngine
 from modifyFormants import tune_formants
 from src.analyzeAmEVowels.parseVowelDistFile import parse_vowel_dist_data
-
+import os
+from dotenv import load_dotenv, find_dotenv
+from CVCSplitter import CROSSFADE_TIME
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -301,21 +303,22 @@ def generate_cvc_dataset(
 # ────────────────────────────────────────────────────────────────────────────
 
 
-def generate_vowel_target_list(vowel_df, target_vowels, f0, f3, f4, group='overall'):
+def generate_vowel_target_list(vowel_df, target_vowels, f0=None, f3=None, f4=None, group='overall'):
     """
     Generate a list of vowel targets using f1 and f2 values from vowel_df
-    and fixed values for f0, f3, and f4.
+    and optional fixed values for f0, f3, and f4.
 
     Args:
         vowel_df (pd.DataFrame): DataFrame with vowel formant statistics.
         target_vowels (list): List of vowel labels (e.g., ["IY", "EH"]).
-        f0 (float): Fixed F0 value.
-        f3 (float): Fixed F3 value.
-        f4 (float): Fixed F4 value.
+        f0 (float, optional): Fixed F0 value.
+        f3 (float, optional): Fixed F3 value.
+        f4 (float, optional): Fixed F4 value.
         group (str): Group name (default = 'overall').
 
     Returns:
-        List[Dict]: List of target dictionaries with label, f0, f1, f2, f3, f4.
+        List[Dict]: List of target dictionaries with label, f1, f2,
+                    and optionally f0, f3, f4.
     """
     target_list = []
 
@@ -324,14 +327,18 @@ def generate_vowel_target_list(vowel_df, target_vowels, f0, f3, f4, group='overa
         if not row.empty:
             f1 = row['f1_mean'].values[0]
             f2 = row['f2_mean'].values[0]
-            target_list.append({
+            target = {
                 "label": vowel,
-                "f0": f0,
                 "f1": f1,
-                "f2": f2,
-                "f3": f3,
-                "f4": f4
-            })
+                "f2": f2
+            }
+            if f0 is not None:
+                target["f0"] = f0
+            if f3 is not None:
+                target["f3"] = f3
+            if f4 is not None:
+                target["f4"] = f4
+            target_list.append(target)
         else:
             print(f"Warning: Vowel '{vowel}' not found in group '{group}'.")
 
@@ -379,60 +386,88 @@ def interpolate_formant_targets(point_a, point_b, n_subdivisions):
 
 
 if __name__ == "__main__":
-    import json
-    from dotenv import load_dotenv, find_dotenv
 
+
+    # ────────────────────────────────────────────────
+    # 1.  Set-up & constants
+    # ────────────────────────────────────────────────
     load_dotenv(find_dotenv())
 
-    # ★ 1. configure ElevenLabs ★
-    tts_engine = PhonemeTTSEngine(
-        api_key=os.environ["ELEVENLABS_API_KEY"],
-        voice_id=os.environ["ELEVENLABS_VOICE_ID"],
-    )
+    vowel_df     = parse_vowel_dist_data("../../input_data/vowel_stats.txt")
+    items        = [("B EH G", "beg")]
+    target_vowels = ["AE", "IH"]
 
-    # ★ 2. define your input set + targets ★
-    items = [
-        ("B EH G", "beg"),
-    ]
-    vowel_df=parse_vowel_dist_data(file_path='../../input_data/vowel_stats.txt')
-
-    # targets = {
-    #     "AH": generate_vowel_target_list(
-    #         vowel_df,
-    #         target_vowels=["AE","UH", "AA", "EH", ],
-    #         f0=99,
-    #         f3=2708,
-    #         f4=3603,
-    #         group="STIMULI"
-    #     )
-    # }
-    f0=79
-    f3=2611
-    f4=3402
-    IH = {"label": "IH", "f1": 467, "f2": 1775}
-    AE = {"label": "AE", "f1": 656, "f2": 1775}
-
-    targets = {
-        "EH": interpolate_formant_targets(IH, AE, n_subdivisions=1)
+    # Lookup for pad_ms based on voice_id
+    pad_ms_lookup = {
+        "Mu5jxyqZOLIGltFpfalg": [0.008+CROSSFADE_TIME/1000, 0.01-CROSSFADE_TIME/1000],   # male
+        "08EClXOC3LHYztbt42HV": [0.091+CROSSFADE_TIME/1000, 0.121-CROSSFADE_TIME/1000],     # female
     }
 
-    print(targets)
+    # Each dict = one dataset you asked for
+    run_configs = [
+        {"output_root": "./generated_cvc_PNW_low_F0",
+         "group"      : "m",
+         "voice_id"   : "Mu5jxyqZOLIGltFpfalg"},
 
-    # ★ 3. run generation ★
-    generate_cvc_dataset(
-        vowel_length = 0.14,
-        cvc_items=items,
-        vowel_targets=targets,
-        tts=tts_engine,
-        output_root="./generated_cvc",
-        pad_ms=[0.081,-0.001],
+        {"output_root": "./generated_cvc_PNW_high_F0",
+         "group"      : "f",
+         "voice_id"   : "08EClXOC3LHYztbt42HV"},
 
-    )
+        {"output_root": "./generated_cvc_PNW_Midwest_Citation_low_F0",
+         "group"      : "NWP_And_Citation",
+         "voice_id"   : "Mu5jxyqZOLIGltFpfalg"},
 
-    print("F1\tF2\tLabel")
-    for vowel, target_list in targets.items():
-        for t in target_list:
-            if "f1" in t and "f2" in t and "label" in t:
+        {"output_root": "./generated_cvc_PNW_Midwest_Reading_low_F0",
+         "group"      : "NWP_And_Reading",
+         "voice_id"   : "Mu5jxyqZOLIGltFpfalg"},
+
+        {"output_root": "./generated_cvc_Peterson_low_F0",
+         "group"      : "PBm",
+         "voice_id"   : "Mu5jxyqZOLIGltFpfalg"},
+
+        {"output_root": "./generated_cvc_Peterson_high_F0",
+         "group"      : "PBw",
+         "voice_id"   : "08EClXOC3LHYztbt42HV"},
+    ]
+
+    # ────────────────────────────────────────────────
+    # 2.  Main generation loop
+    # ────────────────────────────────────────────────
+    for cfg in run_configs:
+        print(f"\n── Generating dataset in {cfg['output_root']} ──")
+
+        pad_ms = pad_ms_lookup[cfg["voice_id"]]   # <--- dict lookup here
+
+        # Build a TTS engine for this voice
+        tts_engine = PhonemeTTSEngine(
+            api_key = os.environ["ELEVENLABS_API_KEY"],
+            voice_id = cfg["voice_id"]
+        )
+
+        # Build vowel target list for this group
+        vowel_targets = {
+            "EH": generate_vowel_target_list(
+                vowel_df,
+                target_vowels = target_vowels,
+                group = cfg["group"],
+            )
+        }
+
+        # Call your dataset generator
+        generate_cvc_dataset(
+            vowel_length = 0.145,
+            cvc_items    = items,
+            vowel_targets = vowel_targets,
+            tts           = tts_engine,
+            output_root   = cfg["output_root"],
+            pad_ms        = pad_ms
+        )
+
+        # Optional: quick per-run summary
+        print("F1\tF2\tLabel")
+        for t in vowel_targets["EH"]:
+            if {"label","f1","f2"} <= t.keys():
                 print(f"\t{t['label']}\t{t['f1']:.2f}\t{t['f2']:.2f}")
 
-    print("Dataset written to ./generated_cvc – happy modelling! ☺")
+    print("\n✓ All six datasets written—happy modelling! ☺")
+

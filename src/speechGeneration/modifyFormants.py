@@ -438,7 +438,7 @@ def tune_formants(
     hifi_cfg: str = "checkpoints/HiFi-Glot/config_hifigan.json",
     fm_cfg: str = "checkpoints/HiFi-Glot/config_feature_map.json",
     ckpt: str = "checkpoints/HiFi-Glot",
-    adam_lr: float = 0.006,
+    adam_lr: float = 0.005,
     freeze_tol: float = 0.019,
     default_f0=True,
 ) -> Tuple[List[float], List[float]]:
@@ -567,7 +567,7 @@ def tune_formants(
                 err[idx] = 0.0
 
 
-            if (abs(abs_diff) > tolerance and not abs(current[idx] / tgt-1) <= 0.03) and not(it >200 and abs(current[idx] / tgt-1) <= 0.02+0.01*(1+it//100)) :
+            if (abs(abs_diff) > tolerance and not abs(current[idx] / tgt-1) <= 0.0199) and not(it >200 and abs(current[idx] / tgt-1) <= 0.01+0.01*(1+it//100)) :
                 all_good = False
 
         if all_good:
@@ -575,7 +575,7 @@ def tune_formants(
             original_rms = calculate_rms_volume(in_wav)
             current_rms = calculate_rms_volume(latest_output)
             print("Loudness ratio:(pre-norm) :", current_rms / original_rms)
-            normalize_volume(latest_output, original_rms)
+            normalize_volume(latest_output, original_rms*0.7)
             # match_loudness(in_wav, latest_output)
             current_rms = calculate_rms_volume(latest_output)
             print("Loudness ratio:(pos-norm) :", current_rms / original_rms)
