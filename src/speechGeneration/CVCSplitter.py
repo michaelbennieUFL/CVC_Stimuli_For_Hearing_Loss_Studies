@@ -6,6 +6,7 @@ praatio 4.x (tgio) and praatio 5.x (textgrid).
 from __future__ import annotations
 
 import math
+import warnings
 from pathlib import Path
 import re, subprocess
 from typing import Iterable, Dict, List, Tuple
@@ -169,11 +170,22 @@ def split_cvc_audio(
 
     data, sr = sf.read(wav_path)           # (samples, channels)
     v0_s, v1_s = vowel_span
+
+    if math.isinf(v0_s):
+        v0_s = 0.0 if v0_s < 0 else len(data) / sr
+    if math.isinf(v1_s):
+        v1_s = 0.0 if v1_s < 0 else len(data) / sr
+
     v0 = int(round(v0_s * sr))
     v1 = int(round(v1_s * sr))
 
-    if v0 < 0 or v1 > len(data):
-        raise ValueError("vowel_span outside audio bounds")
+    if (v0 < 0 and not math.isinf(v0_s)) or (v1 > len(data) and not math.isinf(v1_s)):
+        warnings.warn(
+            f"vowel_span ({v0_s:.3f}s–{v1_s:.3f}s) exceeds audio bounds "
+            f"(0–{len(data) / sr:.3f}s). Clipping to fit."
+        )
+        v0 = max(0, v0)
+        v1 = min(len(data), v1)
 
     # slice the numpy array -------------------------------------------
     c1 = data[:v0]
@@ -236,14 +248,15 @@ def add_audio_buffer_with_noise(input_file: str, output_file: str, buffer_durati
 def generate_splitAudio(wav_path="../../input_data/En-us-bag.wav",transcript="bag",out_dir="../../output_files/temp",
         dictionary="english_us_arpa",
         acoustic_model="english_us_arpa",
-        pad_ms: float | Tuple[float, float] = [0.015,-0.008],):
+        pad_ms: float | Tuple[float, float] = [0.012,-0.007],):
 
 
     if isinstance(pad_ms, (int, float)):
         pad_c1, pad_c2 = pad_ms, pad_ms
     else:
         pad_c1, pad_c2 = pad_ms            # (ms to add to C1 end, ms to add to C2 start)
-
+    pad_c1 = -abs(pad_c1) if math.isinf(pad_c1) else pad_c1
+    pad_c2 = abs(pad_c2) if math.isinf(pad_c2) else pad_c2
 
     VOWELS = [
         "AA", "AE", "AH", "AO", "AW", "AY",
@@ -286,12 +299,15 @@ def match_rms(audio: AudioSegment, target_dBFS: float) -> AudioSegment:
     return audio.apply_gain(change_dBFS)
 
 
-def safe_append(audio1, audio2):
-    min_duration = min(len(audio1), len(audio2))       # milliseconds
-    if min_duration < 10:                 # either part shorter than 100 ms
-        return audio1 + audio2             # no cross-fade
-    crossfade_ms = max(6, min_duration // 10)  #  ≤100 ms,  never 0
+def safe_append(audio1: AudioSegment, audio2: AudioSegment) -> AudioSegment:
+    """Append with a <100 ms cross-fade – but fall back when either part is empty."""
+    if len(audio1) == 0 or len(audio2) == 0:
+        return audio1 + audio2            # simple concat, no cross-fade
+
+    min_duration = min(len(audio1), len(audio2))  # ms
+    crossfade_ms = max(3, min_duration // 20)     # 6–100 ms
     return audio1.append(audio2, crossfade=crossfade_ms)
+
 
 
 
@@ -308,10 +324,11 @@ def recombine_cvc_audio(
     remove_noise_buffer: bool = True,
     noise_buffer_duration: float = 0.15,
     vowel_length: float = 0.10,
+    final_buffer_duration: float | None = 0.5,
 ) -> Path:
     """
     Trim (optionally) buffered noise from a modified V file and stitch it
-    back between C1 and C2.
+    back between C1 and C2. Optionally pads the final audio with silence.
 
     Parameters
     ----------
@@ -324,44 +341,56 @@ def recombine_cvc_audio(
     noise_buffer_duration : Duration (seconds) of the buffer that was
                           added earlier in `split_cvc_audio()`.
     vowel_length   : length in seconds
+    final_buffer_duration : Optional float, duration (seconds) of silence to
+                            add to the beginning and end of final output.
     """
-    # ---------------- paths & defaults ----------------
-    p_mod  = Path(mod_vowel_path).expanduser().resolve()
-    p_c1   = Path(c1_path).expanduser().resolve()
-    p_c2   = Path(c2_path).expanduser().resolve()
-    out_p  = Path(out_path).expanduser().resolve() if out_path else (
+    p_mod = Path(mod_vowel_path).expanduser().resolve()
+    p_c1 = Path(c1_path).expanduser().resolve()
+    p_c2 = Path(c2_path).expanduser().resolve()
+    out_p = Path(out_path).expanduser().resolve() if out_path else (
         p_mod.parent / f"{p_mod.stem}_recomb.wav"
     )
 
-    audio_c1=AudioSegment.from_wav(p_c1)
-    audio_v=AudioSegment.from_wav(p_mod)
-    audio_c2=AudioSegment.from_wav(p_c2)
+    audio_c1 = AudioSegment.from_wav(p_c1)
+    audio_v = AudioSegment.from_wav(p_mod)
+    audio_c2 = AudioSegment.from_wav(p_c2)
 
-
+    # Remove noise buffer from vowel
     if remove_noise_buffer:
-        # Remove the noise buffer from the vowel
         length = audio_v.duration_seconds
-        audio_v=audio_v[noise_buffer_duration*1000:length-noise_buffer_duration*1000]
+        audio_v = audio_v[noise_buffer_duration * 1000 : (length - noise_buffer_duration) * 1000]
 
+    # Trim to target vowel length
     if vowel_length:
         actual_length = audio_v.duration_seconds
-        if actual_length<vowel_length:
-            raise ValueError(f"Vowel is shoter than target length: {actual_length} < {vowel_length}")
+        if actual_length < vowel_length:
+            raise ValueError(f"Vowel is shorter than target length: {actual_length} < {vowel_length}")
+        offset = (actual_length - vowel_length) / 2
+        audio_v = audio_v[offset * 1000 : (offset + vowel_length) * 1000]
 
-        offset = (actual_length-vowel_length)/2
-        audio_v =audio_v[offset*1000:(offset+vowel_length)*1000]
+    dur_c1, dur_c2 = len(audio_c1), len(audio_c2)
 
-    audio_cv = safe_append(audio_c1, audio_v)
-    audio_cvc = safe_append(audio_cv, audio_c2)
+    if dur_c1 == 0 and dur_c2 == 0:
+        audio_cvc = audio_v  # V only
+    elif dur_c1 == 0:
+        audio_cvc = safe_append(audio_v, audio_c2)  # V + C2
+    elif dur_c2 == 0:
+        audio_cvc = safe_append(audio_c1, audio_v)  # C1 + V
+    else:
+        audio_cv = safe_append(audio_c1, audio_v)  # (C1 + V) + C2
+        audio_cvc = safe_append(audio_cv, audio_c2)
 
+    # Add silence before and after if specified
+    if final_buffer_duration is not None and final_buffer_duration > 0:
+        silence = AudioSegment.silent(duration=final_buffer_duration * 1000)
+        audio_cvc = silence + audio_cvc + silence
+
+    # Normalize loudness
     audio_cvc = match_rms(audio_cvc, target_dBFS=-20.0)
     audio_cvc.export(out_p, format="wav")
 
-
-
-
-
     return out_p
+
 
 
 

@@ -66,17 +66,12 @@ def load_unique_words(file_path: str) -> Set[str]:
     return unique_words
 
 def filter_cmudict_words(cmudict_entries: List[Dict], unique_words: Set[str]) -> List[Dict]:
-    """
-    Filters CMUdict entries based on a set of unique words.
+    # Normalize the unique words to lowercase once
+    unique_words_lower = {word.lower() for word in unique_words}
 
-    Args:
-        cmudict_entries (List[Dict]): A list of dictionaries with 'word' and 'pronunciation' keys.
-        unique_words (Set[str]): A set of unique words to filter against.
+    # Avoid calling .lower() repeatedly inside the loop
+    return [entry for entry in cmudict_entries if entry['word'].lower() in unique_words_lower]
 
-    Returns:
-        List[Dict]: A filtered list of CMUdict entries where the words are in the unique words set.
-    """
-    return [entry for entry in cmudict_entries if entry['word'].lower() in unique_words]
 
 
 
@@ -239,23 +234,42 @@ def removeDuplicatePronunciations(word_list: List[Dict[str, List[str]]]) -> List
 
     return unique_words
 
-def generateCombinedWordsets(dictLocation="../../input_data/"):
-    original_word_set = parse_cmudict(dictLocation+"dictionaries/cmudict-0.7b")
-    new_word_set = parse_cmudict(dictLocation+"dictionaries/Wiktionary_arpabet.tsv")
-    new_words_found=0
-    found_words=set()
 
-    for word in original_word_set:
-        found_words.add(word['word'].lower())
+def generateCombinedWordsets(dictLocation="../../input_data/", stress_sensitive=True):
+    """
+    Loads and combines CMUdict and Wiktionary entries, with optional stress removal.
+
+    Args:
+        dictLocation (str): Path to the dictionary files.
+        stress_sensitive (bool): If False, removes stress markers (digits) from pronunciations.
+
+    Returns:
+        List[Dict[str, List[str]]]: Combined and optionally cleaned pronunciation entries.
+    """
+    original_word_set = parse_cmudict(dictLocation + "dictionaries/cmudict-0.7b")
+    new_word_set = parse_cmudict(dictLocation + "dictionaries/Wiktionary_arpabet.tsv")
+
+    new_words_found = 0
+    found_words = set(word['word'].lower() for word in original_word_set)
 
     for item in new_word_set:
-
-        if item["word"]not in found_words:
-            new_words_found+=1
+        if item["word"].lower() not in found_words:
+            new_words_found += 1
             original_word_set.append(item)
-            found_words.add(item['word'])
+            found_words.add(item["word"].lower())
+
     print("New Words Found:", new_words_found)
+
+    # Remove stress markers if not stress-sensitive
+    if not stress_sensitive:
+        for entry in original_word_set:
+            entry['pronunciation'] = [
+                ''.join([c for c in phoneme if not c.isdigit()])
+                for phoneme in entry['pronunciation']
+            ]
+
     return original_word_set
+
 
 # Example usage:
 if __name__ == "__main__":

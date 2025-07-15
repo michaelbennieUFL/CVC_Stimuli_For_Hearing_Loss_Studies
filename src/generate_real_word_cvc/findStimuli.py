@@ -231,17 +231,86 @@ def summarize_c1vc2_input_output_cases(
     return df
 
 
+import collections
+
+
+def find_superset_words(word_list, target_word):
+    """
+    Finds all words in a list that are a character-superset of a target word.
+
+    The comparison is case-insensitive and respects character counts. For example,
+    'DOUBLE-QUOTE' is a superset of 'quote', but not of 'bubble'.
+
+    Args:
+        word_list (list): A list of strings to search through.
+        target_word (str): The word whose characters must be contained in the results.
+
+    Returns:
+        list: A list of words from word_list that are supersets of the target_word.
+    """
+    # Create a frequency count of characters for the lowercase target word.
+    # This is done once to be efficient.
+    target_counts = collections.Counter(target_word.lower())
+
+    superset_matches = []
+
+    for word in word_list:
+        # Optimization: a word can't be a superset if it's shorter than the target.
+        if len(word) < len(target_word):
+            continue
+
+        # Create a frequency count for the current word from the list.
+        word_counts = collections.Counter(word.lower())
+
+        # Check if the word contains all characters from the target with sufficient counts.
+        # The all() function ensures every character condition is met.
+        if all(word_counts[char] >= count for char, count in target_counts.items()):
+            superset_matches.append(word)
+
+    return superset_matches
+
+def find_words_with_substring(word_set, target_substring):
+    """
+    Filters entries in a CMUdict-style word set where the 'word' field
+    contains the target substring (case-insensitive).
+
+    Args:
+        word_set (dict): Dictionary where each value is a dict with a 'word' key.
+        target_substring (str): The substring to search for (case-insensitive).
+
+    Returns:
+        list: List of entries (dicts) matching the condition.
+    """
+    target = target_substring.lower()
+
+    result=[]
+
+
+    for entry in word_set:
+        if target in entry['word'].lower():
+            result.append(entry)
+
+    return result
+
+
 if __name__ == "__main__":
     dictLocation = "../../input_data/"
 
     # ---------- Build the master CVC set ----------
-    original_word_set = generateCombinedWordsets(dictLocation)
-    unique_l2_words  = load_unique_words(
+    original_word_set = generateCombinedWordsets(dictLocation,stress_sensitive=False)
+
+    unique_l2_words = load_unique_words(
         dictLocation + "dictionaries/Oxford_3000_5000_AmericanEnglish.txt"
     )
     filtered_word_set = filter_cmudict_words(original_word_set, unique_l2_words)
+
+
     result_sets       = generateTestWordList(filtered_word_set)
     voiced_cvc        = result_sets["Voiced CVC"]
+
+    results = find_words_with_substring(voiced_cvc, "gym")
+    print("results:",results)
+
 
     # ---------- Define (Cat-1, Cat-2) jobs ----------
     # JOBS = [

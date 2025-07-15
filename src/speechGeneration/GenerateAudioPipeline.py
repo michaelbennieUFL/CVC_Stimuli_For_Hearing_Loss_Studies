@@ -24,6 +24,7 @@ combines them.
 """
 from __future__ import annotations
 
+import math
 import os
 import shutil
 import tempfile
@@ -92,6 +93,7 @@ def generate_vowel_variants(
     dest_dir: Path | str,
     tolerance: float = 50.0,
     max_iters: int = 40,
+    vowel_length=None
 ) -> List[Tuple[Path, str]]:
     """Create *n* vowel‑tuned versions of an existing vowel chunk.
 
@@ -149,6 +151,7 @@ def generate_vowel_variants(
             c2_path=c2_path,
             vowel_phoneme=vowel_phoneme,
             out_path=out_path,
+            vowel_length=vowel_length
         )
         rebuilt.append((out_path, label))
 
@@ -215,6 +218,7 @@ def generate_discordant_pairs(
 def generate_cvc_dataset(
     cvc_items: Sequence[Tuple[str, str]],
     vowel_targets: Dict[str, Sequence[Dict[str, float]]],
+    vowel_length=None,
     *,
     tts: PhonemeTTSEngine,
     base_tmp_dir: Path | str = "./_tmp_cvc",
@@ -280,8 +284,9 @@ def generate_cvc_dataset(
             vowel_phoneme=vowel,
             targets=specs,
             dest_dir=dest_dir,
-            tolerance=10,
-            max_iters=800,
+            tolerance=9,
+            max_iters=1000,
+            vowel_length=vowel_length
         )
 
         # ————————————————— 4. create discordant stereo pairs —————————————
@@ -333,6 +338,46 @@ def generate_vowel_target_list(vowel_df, target_vowels, f0, f3, f4, group='overa
     return target_list
 
 
+
+def interpolate_formant_targets(point_a, point_b, n_subdivisions):
+    """
+    Linearly interpolate between two formant-space points.
+
+    Args:
+        point_a (Dict): {"label": str, "f1": float, "f2": float, ...}
+        point_b (Dict): same keys as point_a.
+        n_subdivisions (int): Number of equally-spaced interior points to create.
+
+    Returns:
+        List[Dict]: [{label, f1, f2, ...}, …] ordered A → B.
+    """
+    if n_subdivisions < 0:
+        raise ValueError("n_subdivisions must be >= 0")
+
+    # Determine which keys to interpolate
+    common_keys = set(point_a.keys()) & set(point_b.keys()) - {"label"}
+    targets = [point_a.copy()]
+
+    for k in range(1, n_subdivisions + 1):
+        t = k / (n_subdivisions + 1)
+        frac_a, frac_b = 1 - t, t
+
+        label = (
+            f"|{point_a['label']}_{int(round(frac_a * 100))}_"
+            f"{point_b['label']}_{int(round(frac_b * 100))}|"
+        )
+
+        interpolated = {"label": label}
+        for key in common_keys:
+            interpolated[key] = frac_a * point_a[key] + frac_b * point_b[key]
+
+        targets.append(interpolated)
+
+    targets.append(point_b.copy())
+    return targets
+
+
+
 if __name__ == "__main__":
     import json
     from dotenv import load_dotenv, find_dotenv
@@ -347,27 +392,47 @@ if __name__ == "__main__":
 
     # ★ 2. define your input set + targets ★
     items = [
-        ("B AH G", "bug"),
+        ("B EH G", "beg"),
     ]
     vowel_df=parse_vowel_dist_data(file_path='../../input_data/vowel_stats.txt')
 
+    # targets = {
+    #     "AH": generate_vowel_target_list(
+    #         vowel_df,
+    #         target_vowels=["AE","UH", "AA", "EH", ],
+    #         f0=99,
+    #         f3=2708,
+    #         f4=3603,
+    #         group="STIMULI"
+    #     )
+    # }
+    f0=79
+    f3=2611
+    f4=3402
+    IH = {"label": "IH", "f1": 467, "f2": 1775}
+    AE = {"label": "AE", "f1": 656, "f2": 1775}
+
     targets = {
-        "AH": generate_vowel_target_list(
-            vowel_df,
-            target_vowels=["AE","UH", "AA", "EH", ],
-            f0=99,
-            f3=2708,
-            f4=3603,
-            group="STIMULI"
-        )
+        "EH": interpolate_formant_targets(IH, AE, n_subdivisions=1)
     }
+
+    print(targets)
 
     # ★ 3. run generation ★
     generate_cvc_dataset(
+        vowel_length = 0.14,
         cvc_items=items,
         vowel_targets=targets,
         tts=tts_engine,
         output_root="./generated_cvc",
+        pad_ms=[0.081,-0.001],
+
     )
+
+    print("F1\tF2\tLabel")
+    for vowel, target_list in targets.items():
+        for t in target_list:
+            if "f1" in t and "f2" in t and "label" in t:
+                print(f"\t{t['label']}\t{t['f1']:.2f}\t{t['f2']:.2f}")
 
     print("Dataset written to ./generated_cvc – happy modelling! ☺")

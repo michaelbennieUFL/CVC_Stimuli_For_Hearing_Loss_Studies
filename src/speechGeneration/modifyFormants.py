@@ -208,8 +208,8 @@ def match_loudness(reference_wav: Path, target_wav: Path):
 # ───────────────────────────────────────── analyse_formants ──────────────────────────────────────────
 def analyse_formants(
     wav_path: str | Path,
-    f0_min: int = 75,
-    f0_max: int = 400,
+    f0_min: int = 60,
+    f0_max: int = 450,
     max_formant: int = 5_500,
 ) -> np.ndarray:
     sound = parselmouth.Sound(str(wav_path))
@@ -272,7 +272,7 @@ class Adam:
 
         v_hat = self.v / (1 - self.b2 ** self.t)
 
-        step_size = self.lr/(math.log(self.t+1)+1) * math.sqrt(1 - self.b2 ** self.t) / (1 - self.b1 ** self.t)
+        step_size = self.lr/(math.log(self.t+1)/2+1) * math.sqrt(1 - self.b2 ** self.t) / (1 - self.b1 ** self.t)
         return params - step_size * m_hat / (np.sqrt(v_hat) + self.eps)
 
 
@@ -438,8 +438,9 @@ def tune_formants(
     hifi_cfg: str = "checkpoints/HiFi-Glot/config_hifigan.json",
     fm_cfg: str = "checkpoints/HiFi-Glot/config_feature_map.json",
     ckpt: str = "checkpoints/HiFi-Glot",
-    adam_lr: float = 0.008,
-    freeze_tol: float = 0.008,
+    adam_lr: float = 0.006,
+    freeze_tol: float = 0.019,
+    default_f0=True,
 ) -> Tuple[List[float], List[float]]:
     """
     Optimise HiFi-Glot's five feature-scale factors to hit the requested formants,
@@ -466,12 +467,15 @@ def tune_formants(
     original = analyse_formants(in_wav)[:5]          # baseline
     scales = np.ones(5, dtype=float)                 # optimisation vars
 
+    if ("f0" not in target or target["f0"] is None) and default_f0:
+        target["f0"] = original[0]  # F0 is index 0
+
     # initialise scales crudely ≈ target/original
     for k, tgt in target.items():
         if k not in FORMANT_IDX: continue
         i = FORMANT_IDX[k.lower()]
         if original[i] > 0:
-            scales[i] = np.clip(tgt / original[i], 0.4, 2.5)
+            scales[i] = np.clip((tgt / original[i])**(0.7)+0.00001, 0.4, 2.5)
 
     optimiser = Adam(size=5, lr=adam_lr)
     frozen = np.zeros(5, dtype=bool)
@@ -534,6 +538,12 @@ def tune_formants(
         table.add_row("Ratios",   *(ratio_val(current[i], f"f{i}") for i in range(5)), "—")
         console.print(table)
 
+        if np.any(np.isnan(current)):
+            console.print("[red]NaN encountered in formant analysis – applying jitter to escape.[/red]")
+            jitter = np.random.uniform(-0.01, 0.01, size=scales.shape)
+            scales = np.clip(scales + jitter, 0.1, 3.5)
+            continue
+
         # ─────────── stopping & gradient calc ─────────
         err = np.zeros(5)
         all_good = True
@@ -545,7 +555,7 @@ def tune_formants(
 
             if abs(current[idx] / tgt-1) <= freeze_tol:
                 frozen[idx] = True
-            elif abs(abs_diff) > tolerance or abs(current[idx] / tgt-1) > freeze_tol*1.1:
+            elif abs(abs_diff) > tolerance or abs(current[idx] / tgt-1) > freeze_tol*1.2:
                 frozen[idx] = False
 
 
@@ -557,7 +567,7 @@ def tune_formants(
                 err[idx] = 0.0
 
 
-            if (abs(abs_diff) > tolerance and not abs(current[idx] / tgt-1) <= 0.05) and not(it >400 and abs(current[idx] / tgt-1) <= 0.02*(1+it//100)) :
+            if (abs(abs_diff) > tolerance and not abs(current[idx] / tgt-1) <= 0.03) and not(it >200 and abs(current[idx] / tgt-1) <= 0.02+0.01*(1+it//100)) :
                 all_good = False
 
         if all_good:
@@ -583,8 +593,8 @@ def tune_formants(
                 #     hifi_cfg=hifi_cfg,
                 #     fm_cfg=fm_cfg,
                 #     ckpt=ckpt,
-                #     n_iter=50,  # tweak to taste
-                #     n_iter_no_change=10,
+                #     n_iter=80,  # tweak to taste
+                #     n_iter_no_change=5,
                 #     T=0.5,  # hotter ⇒ easier to escape
                 #     step_size=0.01,
                 # )
@@ -599,7 +609,7 @@ def tune_formants(
             return scales, current
 
         # treat err/tgt as gradient (sign + magnitude), clip to ±0.5 so we don't explode
-        grad = np.tanh(err / np.maximum(1, np.array([target.get(f"f{i}", 1) for i in range(5)])))
+        grad = np.tanh(err )
         grad[frozen] = 0.0
         scales = optimiser.step(scales, grad)
 
@@ -625,7 +635,7 @@ if __name__ == "__main__":
             output_dir="../../output_files/temp_result/",
             target={"f0": 166, "f1": 804, "f2": 1188},
             tolerance=6,
-            max_iters=40
+            max_iters=80
         )
         print("Final scales:", scales)
         print("Achieved:", freqs)
