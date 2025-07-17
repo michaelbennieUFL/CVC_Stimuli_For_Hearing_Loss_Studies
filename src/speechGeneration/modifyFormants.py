@@ -375,7 +375,7 @@ def refine_with_lbfgs(
 
         def ratio_val(meas, key):
             if key not in target or np.isnan(meas): return "–"
-            return f"{meas / target[key]:.2f}"
+            return f"{meas / target[key]:.3f}"
 
         table.add_row("Target", *(fmt_val(target.get(f"f{i}", None)) for i in range(5)), "—")
         table.add_row("Current", *(fmt_val(current[i]) for i in range(5)), ", ".join(f"{s:.3f}" for s in scales))
@@ -439,9 +439,9 @@ def tune_formants(
     fm_cfg: str = "checkpoints/HiFi-Glot/config_feature_map.json",
     ckpt: str = "checkpoints/HiFi-Glot",
     adam_lr: float = 0.005,
-    freeze_tol: float = 0.019,
+    freeze_tol: float = 0.001,
     default_f0=True,
-) -> Tuple[List[float], List[float]]:
+max_percent_distance=0.011) -> Tuple[List[float], List[float]]:
     """
     Optimise HiFi-Glot's five feature-scale factors to hit the requested formants,
     using Adam instead of binary search.
@@ -457,7 +457,7 @@ def tune_formants(
 
     def ratio_val(meas: float, key: str) -> str:
         if key not in target or np.isnan(meas): return "–"
-        return f"{meas / target[key]:.2f}"
+        return f"{meas / target[key]:.3f}"
 
     # --- prepare -----------------------------------------------------------------
     tmp_in = Path(tempfile.mkdtemp(prefix="hifiglot_in_"))
@@ -567,7 +567,7 @@ def tune_formants(
                 err[idx] = 0.0
 
 
-            if (abs(abs_diff) > tolerance and not abs(current[idx] / tgt-1) <= 0.0199) and not(it >200 and abs(current[idx] / tgt-1) <= 0.01+0.01*(1+it//100)) :
+            if (abs(abs_diff) > tolerance and not abs(current[idx] / tgt-1) <= max_percent_distance) and not(it > 400 and abs(current[idx] / tgt - 1) <= 0.005 * (1 + it // 200)) :
                 all_good = False
 
         if all_good:
@@ -575,7 +575,7 @@ def tune_formants(
             original_rms = calculate_rms_volume(in_wav)
             current_rms = calculate_rms_volume(latest_output)
             print("Loudness ratio:(pre-norm) :", current_rms / original_rms)
-            normalize_volume(latest_output, original_rms*0.7)
+            normalize_volume(latest_output, original_rms*0.3)
             # match_loudness(in_wav, latest_output)
             current_rms = calculate_rms_volume(latest_output)
             print("Loudness ratio:(pos-norm) :", current_rms / original_rms)

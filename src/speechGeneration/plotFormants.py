@@ -7,30 +7,32 @@ from tempfile import NamedTemporaryFile
 from pathlib import Path
 
 
-def extract_formants(sound: parselmouth.Sound, f0_min=60, f0_max=450, max_formant=5500):
-    point_proc = parselmouth.praat.call(sound, "To PointProcess (periodic, cc)", f0_min, f0_max)
-    formants = parselmouth.praat.call(sound, "To Formant (burg)", 0.0025, 5, max_formant, 0.01, 50)
-    pitch = sound.to_pitch()
+def extract_formants(
+    sound: parselmouth.Sound,
+    time_step: float = 0.005,        # 5 ms spacing
+    max_formant: float = 5500,
+    num_formants: int = 4
+):
+    duration = sound.duration
+    times = np.arange(0, duration, time_step)
+    formant_obj = parselmouth.praat.call(
+        sound, "To Formant (burg)", time_step, num_formants, max_formant, 0.035, 50
+    )
+    pitch_obj = sound.to_pitch()
 
-    times, f0 = [], []
-    f_tracks = [[] for _ in range(5)]  # F1–F5
+    f0 = np.array([
+        pitch_obj.get_value_at_time(t) or np.nan for t in times
+    ])
 
-    for i in range(1, parselmouth.praat.call(point_proc, "Get number of points") + 1):
-        t = parselmouth.praat.call(point_proc, "Get time from index", i)
-        f0_val = parselmouth.praat.call(pitch, "Get value at time", t, "Hertz", "Linear")
+    f_tracks = []
+    for formant_idx in range(1, num_formants + 1):
+        formant_track = np.array([
+            formant_obj.get_value_at_time(formant_idx, t) or np.nan
+            for t in times
+        ])
+        f_tracks.append(formant_track)
 
-        formant_vals = [
-            parselmouth.praat.call(formants, "Get value at time", formant_idx + 1, t, "Hertz", "Linear")
-            for formant_idx in range(5)
-        ]
-
-        if not np.isnan(f0_val) and all(not np.isnan(f) for f in formant_vals):
-            times.append(t)
-            f0.append(f0_val)
-            for i, f in enumerate(formant_vals):
-                f_tracks[i].append(f)
-
-    return np.array(times), np.array(f0), [np.array(track) for track in f_tracks]
+    return times, f0, f_tracks
 
 
 def split_stereo_wav(wav_path: Path):
@@ -125,7 +127,7 @@ def plot_formants(
     colors_right = ["cyan",  "lime",  "orchid",   "hotpink",       "darkturquoise"]
 
     # Formants F1–F5
-    for i in range(5):
+    for i in range(4):
         plt.plot(tL, fL[i], label=f"F{i+1} Left",  color=colors_left[i])
         plt.plot(tR, fR[i], label=f"F{i+1} Right", color=colors_right[i],
                  linestyle="--")
@@ -142,8 +144,8 @@ def plot_formants(
     plt.xlabel("Time (s)")
     if use_bark:
         plt.ylabel("Bark Scale")
-        plt.yticks(np.arange(0, 25.5, 0.5))
-        plt.ylim(0, 25)
+        plt.yticks(np.arange(0, 20.5, 0.5))
+        plt.ylim(0, 20)
     else:
         plt.ylabel("Frequency (Hz)")
         plt.yscale("log")
@@ -160,5 +162,5 @@ def plot_formants(
 
 
 if __name__ == "__main__":
-    plot_formants("generated_cvc_good/beg/discordants/cvc_variant_EH_discordant_AE_IH.wav")
-    plot_formants("generated_cvc_good/beg/discordants/cvc_variant_EH_discordant_AE_|IH_50_AE_50|.wav")
+    plot_formants("generated_cvc/beg/discordants/cvc_variant_EH_discordant_AE_IH.wav")
+    plot_formants("generated_cvc/beg/discordants/cvc_variant_EH_discordant_AE_|IH_50_AE_50|.wav")

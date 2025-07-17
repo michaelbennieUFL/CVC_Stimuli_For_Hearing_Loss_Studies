@@ -18,7 +18,7 @@ import soundfile as sf
 import numpy as np
 from datetime import datetime
 
-CROSSFADE_TIME=2
+CROSSFADE_TIME=4
 # --------------------------------------------------------------------
 # 1. generate_textgrid  (unchanged)
 # --------------------------------------------------------------------
