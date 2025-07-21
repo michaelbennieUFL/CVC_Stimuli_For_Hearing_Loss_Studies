@@ -208,7 +208,7 @@ def match_loudness(reference_wav: Path, target_wav: Path):
 # ───────────────────────────────────────── analyse_formants ──────────────────────────────────────────
 
 
-def compute_trimmed_f0(f0_values, lower=35, upper=45):
+def compute_trimmed_f0(f0_values, lower=30, upper=47):
     """
     Computes mean F0 within a specified middle percentile range.
     """
@@ -216,6 +216,27 @@ def compute_trimmed_f0(f0_values, lower=35, upper=45):
     q3 = np.percentile(f0_values, upper)
     iqr_values = f0_values[(f0_values >= q1) & (f0_values <= q3)]
     return iqr_values.mean() if len(iqr_values) > 0 else None
+
+
+def mean_middle_percent(values: np.ndarray, middle_percent: float = 0.70) -> float:
+    """
+    Compute the mean of the middle `middle_percent` values by index.
+    Does not sort by value – just trims based on position.
+    """
+    n = len(values)
+    if n == 0:
+        return float("nan")
+
+    # Compute start and end index
+    trim_each_side = int(round((1 - middle_percent) / 2 * n))
+    start = trim_each_side
+    end = n - trim_each_side
+
+    if end <= start:
+        return float("nan")
+
+    return np.mean(values[start:end])
+
 
 def analyse_formants(
     wav_path: str | Path,
@@ -243,7 +264,7 @@ def analyse_formants(
     # Compute trimmed mean F0
     mean_f0 = compute_trimmed_f0(f0_values)
 
-    means = [float(mean_f0)] + [float(np.mean(track)) for track in f_tracks]
+    means = [float(mean_f0)] + [float(mean_middle_percent(track)) for track in f_tracks]
     return np.array(means[:6])  # F0 … F5
 
 

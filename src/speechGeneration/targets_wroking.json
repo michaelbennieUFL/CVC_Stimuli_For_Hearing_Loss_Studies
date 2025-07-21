@@ -1,6 +1,39 @@
 [
-
-  {
+     {
+    "output_root": "./generated_cvc_final/did_dad_dead_run",
+    "items": [
+      ["D IH D", "did"]
+    ],
+    "f0f3f4": { "f3": 2596, "f4": 3403 },
+    "vowel_targets": [
+      { "vowel": "IH", "f1": 485, "f2": 1882, "label": "IH" },
+      { "vowel": "AE", "f1": 668, "f2": 1852, "label": "AE" }
+    ],
+    "targets": ["IH"],
+    "vowel_length": 0.13,
+    "pad_ms": [-0.0011, -0.012 ],
+    "crossfade_time": 0,
+    "tolerance": 1.4,
+    "max_percent_distance": 0.002
+  },
+    {
+    "output_root": "./generated_cvc_final/big_bag_beg_run",
+    "items": [
+      ["B EH G", "beg"]
+    ],
+    "f0f3f4": { "f3": 2596, "f4": 3403 },
+    "vowel_targets": [
+      { "vowel": "IH", "f1": 485, "f2": 1882, "label": "IH" },
+      { "vowel": "AE", "f1": 668, "f2": 1852, "label": "AE" }
+    ],
+    "targets": ["EH"],
+    "vowel_length": 0.13,
+    "pad_ms": [-0.0166, -0.034],
+    "crossfade_time": 2,
+    "tolerance": 1.4,
+    "max_percent_distance": 0.002
+  },
+    {
     "output_root": "./generated_cvc_final/bid_bad_bed_run",
     "items": [
 
@@ -8,8 +41,8 @@
     ],
     "f0f3f4": { "f3": 2596, "f4": 3403 },
     "vowel_targets": [
-      { "vowel": "IH", "f1": 500, "f2": 1882, "label": "IH" },
-      { "vowel": "AE", "f1": 668, "f2": 1864, "label": "AE" }
+      { "vowel": "IH", "f1": 485, "f2": 1882, "label": "IH" },
+      { "vowel": "AE", "f1": 668, "f2": 1852, "label": "AE" }
     ],
     "targets": ["EH"],
     "vowel_length": 0.13,
@@ -17,23 +50,5 @@
     "crossfade_time": 1,
     "tolerance": 1.4,
     "max_percent_distance": 0.002
-  },
-  {
-    "output_root": "./generated_cvc_final/beg_run",
-    "items": [
-      ["B EH G", "beg"]
-    ],
-    "f0f3f4": { "f3": 2596, "f4": 3403 },
-    "vowel_targets": [
-      { "vowel": "IH", "f1": 500, "f2": 1882, "label": "IH" },
-      { "vowel": "AE", "f1": 668, "f2": 1864, "label": "AE" }
-    ],
-    "targets": ["EH"],
-    "vowel_length": 0.13,
-    "pad_ms": [-0.0166, -0.035],
-    "crossfade_time": 3,
-    "tolerance": 1.4,
-    "max_percent_distance": 0.002
   }
-
 ]
