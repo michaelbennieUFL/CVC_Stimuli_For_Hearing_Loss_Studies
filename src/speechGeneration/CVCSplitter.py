@@ -301,13 +301,13 @@ def match_rms(audio: AudioSegment, target_dBFS: float) -> AudioSegment:
     return audio.apply_gain(change_dBFS)
 
 
-def safe_append(audio1: AudioSegment, audio2: AudioSegment) -> AudioSegment:
+def safe_append(audio1: AudioSegment, audio2: AudioSegment, crossfade_time=CROSSFADE_TIME) -> AudioSegment:
     """Append with a <100 ms cross-fade – but fall back when either part is empty."""
     if len(audio1) == 0 or len(audio2) == 0:
         return audio1 + audio2            # simple concat, no cross-fade
 
     min_duration = min(len(audio1), len(audio2))  # ms
-    crossfade_ms = max(CROSSFADE_TIME, min_duration // 200)     # 6–100 ms
+    crossfade_ms = max(crossfade_time, min_duration // 200)     # 6–100 ms
     return audio1.append(audio2, crossfade=crossfade_ms)
 
 
@@ -327,6 +327,7 @@ def recombine_cvc_audio(
     noise_buffer_duration: float = 0.15,
     vowel_length: float = 0.10,
     final_buffer_duration: float | None = 0.5,
+    crossfade_time=CROSSFADE_TIME,
 ) -> Path:
     """
     Trim (optionally) buffered noise from a modified V file and stitch it
@@ -375,12 +376,12 @@ def recombine_cvc_audio(
     if dur_c1 == 0 and dur_c2 == 0:
         audio_cvc = audio_v  # V only
     elif dur_c1 == 0:
-        audio_cvc = safe_append(audio_v, audio_c2)  # V + C2
+        audio_cvc = safe_append(audio_v, audio_c2,crossfade_time)  # V + C2
     elif dur_c2 == 0:
-        audio_cvc = safe_append(audio_c1, audio_v)  # C1 + V
+        audio_cvc = safe_append(audio_c1, audio_v,crossfade_time)  # C1 + V
     else:
-        audio_cv = safe_append(audio_c1, audio_v)  # (C1 + V) + C2
-        audio_cvc = safe_append(audio_cv, audio_c2)
+        audio_cv = safe_append(audio_c1, audio_v,crossfade_time)  # (C1 + V) + C2
+        audio_cvc = safe_append(audio_cv, audio_c2,crossfade_time)
 
     # Add silence before and after if specified
     if final_buffer_duration is not None and final_buffer_duration > 0:

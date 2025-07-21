@@ -1,8 +1,58 @@
-from collections import defaultdict
-from typing import List, Dict, Tuple
+from typing import Tuple
 
 from src.generate_real_word_cvc.CMUreader import *
-from src.generate_real_word_cvc.TestVocabMaker import *
+from src.speechGeneration.TestVocabMaker import *
+
+import requests, random, functools, time
+
+# --- ❶  Simple in-memory cache --------------------------------------
+@functools.lru_cache(maxsize=10_000)
+def _query_ngram_api(token: str) -> float:
+    """
+    Return api.ngrams.dev relative frequency or raise on network/JSON errors.
+    """
+    url     = "https://api.ngrams.dev/eng/search"
+    headers = {
+        "User-Agent": "cvc-script/1.0 (+https://yourlab.org)",
+        "Accept": "application/json",
+        "Referer": "https://ngrams.dev/",
+    }
+    try:
+        r = requests.get(url, params={"query": token, "flags": "cs"},
+                         headers=headers, timeout=5)
+        r.raise_for_status()
+        data = r.json()
+        return float(data["ngrams"][0]["relTotalMatchCount"])
+    except Exception as e:
+        raise RuntimeError(f"ngram API failure for '{token}': {e}") from e
+
+
+# --- ❷  Public wrapper with fallback --------------------------------
+def lookup_ngram_freq(word: str,
+
+                      retries: int = 3,
+                      backoff: float = 0.5) -> float:
+    """
+    • Returns the API frequency for *real* tokens.
+    • If the API returns 0.0 **or** raises → assign a pseudo-frequency default to 1e-9
+
+    Caches successful look-ups via `functools.lru_cache`.
+    """
+    token = word.upper()          # api.ngrams.dev is case-sensitive
+
+    for attempt in range(retries):
+        try:
+            freq = _query_ngram_api(token)
+            if freq > 0.0:
+                return freq
+            break                      # 0.0 → treat as fake
+        except RuntimeError as err:
+            if attempt == retries - 1:
+                print(err)
+            time.sleep(backoff * (attempt + 1))
+
+    # Fallback = “fake” word
+    return 10**-10
 
 
 def find_c1vc2_cases(
@@ -85,7 +135,6 @@ def find_c1vc2_cases(
     return {"case1": case1, "case2": case2, "case3": case3}
 
 
-import itertools
 import pandas as pd
 from collections import defaultdict
 from typing import List, Dict, Tuple
@@ -110,73 +159,19 @@ def _index_c1vc2(cvc_word_list):
 # ---------------------------------------------------------------------
 #  New summariser (single row per C1–C2 with maximal coverage)
 # ---------------------------------------------------------------------
-def summarize_c1vc2_conditions(
-        cvc_word_list: List[Dict[str, List[str]]],
-        category1_vowels: List[str],
-        category2_vowels: List[str],
-        min_Inner_Category__real: int = 2,           # ← NEW
-        tsv_path: str = "c1vc2_summary.tsv"
-    ) -> pd.DataFrame:
-
-    combos = _index_c1vc2(cvc_word_list)
-    Outer_Category_ = set(category1_vowels)
-    Inner_Category_ = set(category2_vowels)
-
-    rows = []
-    for (c1, c2), vmap in combos.items():
-        have = set(vmap.keys())
-
-        # keep only if at least N Cat-2 vowels present
-        present_Inner_Category_ = Inner_Category_ & have
-        if len(present_Inner_Category_) < min_Inner_Category__real:
-            continue
-
-        # determine Cat-1 coverage
-        present_Outer_Category_ = Outer_Category_ & have
-        if len(present_Outer_Category_) == len(Outer_Category_):
-            case = "RW_RW"
-        elif len(present_Outer_Category_) == 0:
-            case = "FW_FW"
-        else:
-            case = "RW_FW"
-
-        rows.append({
-            "C1": c1,
-            "C2": c2,
-            "Case": case,
-            "OuterLen": len(present_Outer_Category_),
-            "InnerLen": len(present_Inner_Category_),
-            "Outer_Category_Vowel": ",".join(sorted(Outer_Category_)),                    # ← ALL Category 1 vowels
-            "Inner_Category_Vowel": ",".join(sorted(Inner_Category_)),                    # ← ALL Category 2 vowels
-            "Outer_Category_Present": ",".join(sorted(present_Outer_Category_)),
-            "Inner_Category_Present": ",".join(sorted(present_Inner_Category_)),
-            "Outer_Category_Words": ",".join(vmap[v]["word"] for v in sorted(present_Outer_Category_)),
-            "Inner_Category_Words": ",".join(vmap[v]["word"] for v in sorted(present_Inner_Category_)),
-        })
-
-
-
-    df = (pd.DataFrame(rows)
-            .sort_values(["C1", "C2", "Case"], ignore_index=True))
-    df.to_csv(tsv_path, sep="\t", index=False)
-    return df
-
-
-
+# ---------------------------------------------------------------------
+#  patched summarize_c1vc2_input_output_cases  (only rows.append part changed)
+# ---------------------------------------------------------------------
 def summarize_c1vc2_input_output_cases(
         cvc_word_list: List[Dict[str, List[str]]],
-        category1_vowels: List[str],          # “outer” – source/input vowels
-        category2_vowels: List[str],          # “inner” – target/output vowels
+        category1_vowels: List[str],          # outer / “input” vowels
+        category2_vowels: List[str],          # inner / “output” vowels
         tsv_path: str = "c1vc2_summary.tsv"
     ) -> pd.DataFrame:
-    """
-    Produce one row per (C1, C2) pair, labelling both the input-side
-    real/fake pattern (outer vowels) and the output-side pattern
-    (inner vowels).  No minimum-coverage filters are applied.
-    """
+
     combos           = _index_c1vc2(cvc_word_list)
-    Outer_Category_  = set(category1_vowels)
-    Inner_Category_  = set(category2_vowels)
+    Outer_Category_  = [v.upper() for v in category1_vowels]   # keep order!
+    Inner_Category_  = set(v.upper() for v in category2_vowels)
 
     INPUT_ORDER   = ["RW_RW", "RW_FW", "FW_FW"]
     OUTPUT_ORDER  = ["All_Real", "Mixed", "All_Fake"]
@@ -185,8 +180,8 @@ def summarize_c1vc2_input_output_cases(
     for (c1, c2), vmap in combos.items():
         have = set(vmap.keys())
 
-        # ---------- INPUT side (outer) ----------
-        present_outer = Outer_Category_ & have
+        # -----  INPUT-side case  -----
+        present_outer = [v for v in Outer_Category_ if v in have]
         if len(present_outer) == len(Outer_Category_):
             input_case = "RW_RW"
         elif len(present_outer) == 0:
@@ -194,7 +189,7 @@ def summarize_c1vc2_input_output_cases(
         else:
             input_case = "RW_FW"
 
-        # ---------- OUTPUT side (inner) ----------
+        # -----  OUTPUT-side case -----
         present_inner = Inner_Category_ & have
         if len(present_inner) == len(Inner_Category_):
             output_case = "All_Real"
@@ -203,32 +198,59 @@ def summarize_c1vc2_input_output_cases(
         else:
             output_case = "Mixed"
 
+        # -----  New frequency columns --------------------------------
+        #  Outer_Left_Freq  = freq of first outer vowel (if present)
+        #  Outer_Right_Freq = freq of second outer vowel (if present)
+        outer_left_freq  = 10**-10
+        outer_right_freq = 10**-10
+
+        if len(Outer_Category_) >= 1 and Outer_Category_[0] in vmap:
+            outer_left_freq = lookup_ngram_freq(vmap[Outer_Category_[0]]["word"])
+        if len(Outer_Category_) >= 2 and Outer_Category_[1] in vmap:
+            outer_right_freq = lookup_ngram_freq(vmap[Outer_Category_[1]]["word"])
+
+        #  Middle_Mean_Freq = mean freq of ALL present inner-category words
+        inner_freqs = [
+            lookup_ngram_freq(vmap[v]["word"]) for v in present_inner
+        ]
+        middle_mean_freq = sum(inner_freqs) / len(inner_freqs) if inner_freqs else 0.0
+
         rows.append({
             "C1": c1,
             "C2": c2,
             "Input_Case":  input_case,
             "Output_Case": output_case,
+
+            # new columns
+            "Outer_Left_Freq":  outer_left_freq,
+            "Outer_Right_Freq": outer_right_freq,
+            "Middle_Mean_Freq": middle_mean_freq,
+
+            # keep the old metadata
             "OuterLen": len(present_outer),
             "InnerLen": len(present_inner),
-            "Outer_Category_Vowel":  ",".join(sorted(Outer_Category_)),
+            "Outer_Category_Vowel":  ",".join(Outer_Category_),
             "Inner_Category_Vowel":  ",".join(sorted(Inner_Category_)),
             "Outer_Category_Present":",".join(sorted(present_outer)),
             "Inner_Category_Present":",".join(sorted(present_inner)),
-            "Outer_Category_Words":  ",".join(vmap[v]["word"] for v in sorted(present_outer)),
-            "Inner_Category_Words":  ",".join(vmap[v]["word"] for v in sorted(present_inner)),
+            "Outer_Category_Words":  ",".join(vmap[v]["word"] for v in present_outer),
+            "Inner_Category_Words":  ",".join(vmap[v]["word"] for v in present_inner),
         })
 
+    # ----------  sort & export as before ----------
     df = pd.DataFrame(rows)
-
-    # ----------  custom sort order ----------
     df["Input_Case"]  = pd.Categorical(df["Input_Case"],  categories=INPUT_ORDER,  ordered=True)
     df["Output_Case"] = pd.Categorical(df["Output_Case"], categories=OUTPUT_ORDER, ordered=True)
 
-    sort_cols = ["Input_Case", "Output_Case", "Outer_Category_Vowel", "OuterLen", "InnerLen", "C1", "C2"]
+    sort_cols = ["Input_Case", "Output_Case", "Outer_Category_Vowel",
+                 "OuterLen", "InnerLen", "C1", "C2"]
     df = df.sort_values(sort_cols, ignore_index=True)
-
     df.to_csv(tsv_path, sep="\t", index=False)
     return df
+
+
+
+
 
 
 import collections
@@ -297,77 +319,69 @@ if __name__ == "__main__":
     dictLocation = "../../input_data/"
 
     # ---------- Build the master CVC set ----------
-    original_word_set = generateCombinedWordsets(dictLocation,stress_sensitive=False)
+    original_word_set = generateCombinedWordsets(dictLocation, stress_sensitive=False)
 
     unique_l2_words = load_unique_words(
         dictLocation + "dictionaries/Oxford_3000_5000_AmericanEnglish.txt"
     )
     filtered_word_set = filter_cmudict_words(original_word_set, unique_l2_words)
 
+    result_sets = generateTestWordList(filtered_word_set)
+    voiced_cvc  = result_sets["Voiced CVC"]
 
-    result_sets       = generateTestWordList(filtered_word_set)
-    voiced_cvc        = result_sets["Voiced CVC"]
-
-    results = find_words_with_substring(voiced_cvc, "gym")
-    print("results:",results)
-
+    # quick test
+    print("results:", find_words_with_substring(voiced_cvc, "gym"))
 
     # ---------- Define (Cat-1, Cat-2) jobs ----------
-    # JOBS = [
-    #     ("Job1_Inner_Category__AA_AH_UH", ["UH", "AE"], ["AA", "AH", "EH"]),
-    #     ("Job2_Inner_Category__AE_AH_UH", ["EH", "AA"], ["AE", "AH"]),
-    #     ("Job3_Inner_Category__AH_UH", ["AA", "UW"], ["AH", "UH"]),
-    # ]
-
-
-
     MONOTHONG_JOBS = [
-        ("Job1_Inner_Category__AA_AH_UH", ["IH", "AE"], ["EH"]),
-        ("Job2_Inner_Category__AE_AH_UH", ["EH", "UW"], ["UH"]),
+        ("Job1_Inner_Category__AA_AH_UH", ["IH", "AE"], ["EH"])
     ]
 
-    all_frames = []    # collect dataframes for an optional mega-table
+    all_frames = []
 
     for label, Outer_Category_, Inner_Category_ in MONOTHONG_JOBS:
         out_file = f"wordlist/{label}.tsv"
         print(f"→ Building {out_file} …")
 
-        df = summarize_c1vc2_input_output_cases(
+        df = summarize_c1vc2_input_output_cases(          # ← now returns freq cols
             voiced_cvc,
             category1_vowels=Outer_Category_,
             category2_vowels=Inner_Category_,
             tsv_path=out_file
         )
-        df["JobLabel"] = label           # keep provenance if we merge later
+        df["JobLabel"] = label
         all_frames.append(df)
 
-    # ---------- One combined TSV (optional) ----------
+    # ---------- One combined TSV ----------
     print("→ Building combined summary …")
 
     mega = pd.concat(all_frames, ignore_index=True)
 
-    # Ensure consistent category ordering for sorting
+    # category ordering (unchanged)
     INPUT_ORDER  = ["RW_RW", "RW_FW", "FW_FW"]
     OUTPUT_ORDER = ["All_Real", "Mixed", "All_Fake"]
 
-    mega["Input_Case"]  = pd.Categorical(mega["Input_Case"], categories=INPUT_ORDER, ordered=True)
-    mega["Output_Case"] = pd.Categorical(mega["Output_Case"], categories=OUTPUT_ORDER, ordered=True)
+    mega["Input_Case"]  = pd.Categorical(mega["Input_Case"],  INPUT_ORDER,  ordered=True)
+    mega["Output_Case"] = pd.Categorical(mega["Output_Case"], OUTPUT_ORDER, ordered=True)
 
-    mega = mega.sort_values([
-        "Input_Case", "Output_Case", "Outer_Category_Vowel",
-        "OuterLen", "InnerLen", "C1", "C2"
-    ])
+    mega = mega.sort_values(
+        ["Input_Case", "Output_Case", "Outer_Category_Vowel",
+         "OuterLen", "InnerLen", "C1", "C2"]
+    )
 
+    # ---------- Desired column order  🔄  (new freq cols added) ----------
     desired_order = [
-        "Input_Case", "Output_Case", "OuterLen", "InnerLen", "C1", "C2",
+        "Input_Case", "Output_Case",
+        "OuterLen", "InnerLen", "C1", "C2",
         "Outer_Category_Vowel", "Inner_Category_Vowel",
         "Outer_Category_Present", "Inner_Category_Present",
         "Outer_Category_Words", "Inner_Category_Words",
-        "JobLabel"
+        "Outer_Left_Freq", "Outer_Right_Freq", "Middle_Mean_Freq",
+        "JobLabel",
+
     ]
 
     mega = mega[desired_order]
-
     mega.to_csv("wordlist/ALL_CVC_jobs.tsv", sep="\t", index=False)
 
     print("All done! Per-job TSVs plus ALL_CVC_jobs.tsv have been written.")

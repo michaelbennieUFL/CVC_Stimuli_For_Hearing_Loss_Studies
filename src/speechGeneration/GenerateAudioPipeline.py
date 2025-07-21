@@ -24,13 +24,14 @@ combines them.
 """
 from __future__ import annotations
 
+import json
 import math
 import os
 import shutil
 import tempfile
 from itertools import permutations
 from pathlib import Path
-from typing import Dict, List, Sequence, Tuple
+from typing import Dict, List, Sequence, Tuple, Union, Any
 
 from pydub import AudioSegment
 
@@ -95,7 +96,9 @@ def generate_vowel_variants(
     dest_dir: Path | str,
     tolerance: float = 50.0,
     max_iters: int = 40,
-    vowel_length=None
+    crossfade_time=3,
+    vowel_length=None,
+    max_percent_distance=0.002
 ) -> List[Tuple[Path, str]]:
     """Create *n* vowel‑tuned versions of an existing vowel chunk.
 
@@ -137,7 +140,7 @@ def generate_vowel_variants(
                 target=spec,
                 tolerance=tolerance,
                 max_iters=max_iters,
-                max_percent_distance=0.002
+                max_percent_distance=max_percent_distance
             )
         except RuntimeError as e:
             print(f"[WARN] Formant tuning #{i} failed: {e}")
@@ -154,7 +157,8 @@ def generate_vowel_variants(
             c2_path=c2_path,
             vowel_phoneme=vowel_phoneme,
             out_path=out_path,
-            vowel_length=vowel_length
+            vowel_length=vowel_length,
+            crossfade_time=crossfade_time
         )
         rebuilt.append((out_path, label))
 
@@ -227,13 +231,16 @@ def generate_cvc_dataset(
     base_tmp_dir: Path | str = "./_tmp_cvc",
     output_root: Path | str = "./cvc_dataset",
     pad_ms: Tuple[float, float] | float | None = None,
+    tolerance: float = 50.0,
+    max_iters: int = 40,
+    crossfade_time: int = 3,
+    max_percent_distance=0.03,
     **generate_split_kwargs,
 ) -> None:
     """End‑to‑end generation of a labelled CVC dataset **plus discordants**.
 
-    Everything works exactly as before, but now – after producing the tuned
-    vowel variants – we automatically call `generate_discordant_pairs()` so
-    that every left‑/right‑channel permutation is exported.
+    Adds parameters for formant tuning precision (tolerance), iteration cap,
+    and audio recombination crossfade duration.
     """
     base_tmp_dir = Path(base_tmp_dir).resolve()
     output_root = Path(output_root).resolve()
@@ -245,38 +252,33 @@ def generate_cvc_dataset(
         work_dir = base_tmp_dir / slug
         work_dir.mkdir(parents=True, exist_ok=True)
 
-        # ————————————————— 1. synthesise base CVC via ElevenLabs —————————————————
+        # 1. synthesize base word
         raw_cvc_path = work_dir / f"{slug}_base.wav"
         tts.speak_phonemes(phoneme_str, output_path=str(raw_cvc_path))
 
-        # ————————————————— 2. segment into C1 / V / C2 ————————————————————
-        if pad_ms is None:
-            c1_path, v_path, c2_path = generate_splitAudio(
-                wav_path=str(raw_cvc_path),
-                transcript=word,
-                out_dir=str(work_dir),
-                **generate_split_kwargs,
-            )
-        else:
-            c1_path, v_path, c2_path = generate_splitAudio(
-                wav_path=str(raw_cvc_path),
-                transcript=word,
-                out_dir=str(work_dir),
-                pad_ms=pad_ms,
-                **generate_split_kwargs,
-            )
+        # 2. split into C1 / V / C2
+        split_args = dict(
+            wav_path=str(raw_cvc_path),
+            transcript=word,
+            out_dir=str(work_dir),
+            **generate_split_kwargs,
+        )
+        if pad_ms is not None:
+            split_args["pad_ms"] = pad_ms
 
+        c1_path, v_path, c2_path = generate_splitAudio(**split_args)
+
+        # 3. get vowel and variants
         vowel = _extract_vowel(phoneme_str)
         specs = vowel_targets.get(vowel, [])
         if not specs:
             print(f"[INFO] No formant targets provided for vowel '{vowel}' – skipping variants.")
             continue
 
-        # ————————————————— 3. generate tuned variants —————————————————————
         dest_dir = output_root / slug
         dest_dir.mkdir(parents=True, exist_ok=True)
 
-        # copy original segments for reference
+        # Copy reference chunks
         for p in (c1_path, v_path, c2_path):
             shutil.copy2(p, dest_dir / p.name)
 
@@ -287,17 +289,20 @@ def generate_cvc_dataset(
             vowel_phoneme=vowel,
             targets=specs,
             dest_dir=dest_dir,
-            tolerance=1.4,
-            max_iters=1000,
-            vowel_length=vowel_length
+            tolerance=tolerance,
+            max_iters=max_iters,
+            vowel_length=vowel_length,
+            crossfade_time=crossfade_time,
+            max_percent_distance=max_percent_distance
         )
 
-        # ————————————————— 4. create discordant stereo pairs —————————————
+        # 4. Create discordant stereo pairs
         generate_discordant_pairs(
             vowel_phoneme=vowel,
             variants=variant_pairs,
             dest_dir=dest_dir,
         )
+
 
 # ────────────────────────────────────────────────────────────────────────────
 # CLI quick‑start (optional) — unchanged except for sample targets
@@ -387,65 +392,178 @@ def interpolate_formant_targets(point_a, point_b, n_subdivisions):
 
 
 
+
+
+def _coerce_pad_ms(val: Any) -> Tuple[float, float] | float | None:
+    if val is None:
+        return None
+    if isinstance(val, (int, float)):
+        return float(val)
+    if isinstance(val, (list, tuple)) and len(val) == 2:
+        return (float(val[0]), float(val[1]))
+    raise TypeError("pad_ms must be number, 2-element list/tuple, or null.")
+
+
+def _expand_vowel_targets_if_needed(cfg: dict) -> Dict[str, Sequence[Dict[str, float]]]:
+    """
+    Create full vowel-to-target mapping from `targets` + `vowel_targets`.
+
+    - `cfg["targets"]` should be a list like ["EH", "AE"]
+    - `cfg["vowel_targets"]` contains f1/f2/formant specs with labels (e.g., IH, AE)
+    - `cfg["f0f3f4"]` is merged into any target that lacks those fields
+
+    Returns:
+        Dict[str, List[Dict]] – mapping like { "EH": [ {...}, {...} ], ... }
+    """
+    requested_targets = cfg.get("targets")
+    vowel_specs = cfg.get("vowel_targets") or []
+    global_ff = cfg.get("f0f3f4") or {}
+
+    if not requested_targets or not isinstance(requested_targets, list):
+        return {}
+
+    # Index vowel_targets by label for lookup
+    label_map = {row["label"]: row for row in vowel_specs if "label" in row}
+
+    out = {}
+    for vowel in requested_targets:
+        specs = []
+
+        for label, row in label_map.items():
+            # copy row so we don't modify original
+            spec = {
+                "label": label,
+                "f1": row["f1"],
+                "f2": row["f2"],
+            }
+
+            for k in ("f0", "f3", "f4"):
+                if k in row:
+                    spec[k] = row[k]
+                elif k in global_ff:
+                    spec[k] = global_ff[k]
+
+            specs.append(spec)
+
+        out[vowel.upper()] = specs
+
+    return out
+
+
+
+def _coerce_items(val: Any) -> Sequence[Tuple[str, str]]:
+    if not isinstance(val, (list, tuple)):
+        raise TypeError("items must be a list of [phoneme_str, word] pairs.")
+    out = []
+    for row in val:
+        if not isinstance(row, (list, tuple)) or len(row) != 2:
+            raise ValueError(f"Bad item row: {row!r}")
+        ph, wd = row
+        out.append((str(ph), str(wd)))
+    return out
+
+
+def load_cvc_runs(json_data_or_path: Union[str, Path, list]) -> List[dict]:
+    """
+    Load and normalize a list of run configs.
+    """
+    if isinstance(json_data_or_path, (str, Path)):
+        with open(json_data_or_path, "r", encoding="utf8") as f:
+            raw = json.load(f)
+    else:
+        raw = json_data_or_path
+
+    if not isinstance(raw, list):
+        raise ValueError("Top-level JSON must be a list of run objects.")
+
+    runs = []
+    for i, cfg in enumerate(raw):
+        if not isinstance(cfg, dict):
+            raise ValueError(f"Run #{i} is not an object.")
+
+        if "output_root" not in cfg:
+            raise ValueError(f"Run #{i} missing required 'output_root'.")
+
+        if "items" not in cfg:
+            raise ValueError(f"Run #{i} missing required 'items'.")
+
+        cfg_norm = dict(cfg)  # shallow copy
+
+        cfg_norm["items"] = _coerce_items(cfg["items"])
+        cfg_norm["pad_ms"] = _coerce_pad_ms(cfg.get("pad_ms"))
+        cfg_norm["crossfade_time"] = int(cfg.get("crossfade_time", 3))
+        cfg_norm["tolerance"] = float(cfg.get("tolerance", 50.0))
+        cfg_norm["max_percent_distance"] = float(cfg.get("max_percent_distance", 0.03))
+        if "vowel_length" in cfg_norm and cfg_norm["vowel_length"] is not None:
+            cfg_norm["vowel_length"] = float(cfg_norm["vowel_length"])
+        else:
+            cfg_norm["vowel_length"] = None
+
+        # build targets (handles precedence)
+        cfg_norm["targets"] = _expand_vowel_targets_if_needed(cfg_norm)
+
+        runs.append(cfg_norm)
+
+    return runs
+
+
+def run_cvc_from_configs(
+    runs: List[dict],
+    *,
+    api_key: str,
+    default_voice_id: str,
+    base_tmp_dir: Path | str = "./_tmp_cvc",
+    **generate_split_kwargs,
+) -> None:
+    """
+    Execute all runs. Each run may override `voice_id`.
+    """
+    for r in runs:
+        voice_id = r.get("voice_id", default_voice_id)
+        tts_engine = PhonemeTTSEngine(api_key=api_key, voice_id=voice_id)
+
+        generate_cvc_dataset(
+            cvc_items=r["items"],
+            vowel_targets=r["targets"],        # already normalized mapping
+            vowel_length=r["vowel_length"],
+            tts=tts_engine,
+            base_tmp_dir=base_tmp_dir,
+            output_root=r["output_root"],
+            pad_ms=r["pad_ms"],
+            tolerance=r["tolerance"],
+            max_iters=int(r.get("max_iters", 850)),  # allow override though not numbered; fallback 40
+            crossfade_time=r["crossfade_time"],
+            max_percent_distance=r["max_percent_distance"],
+            **generate_split_kwargs,
+        )
+
+
 # ────────────────────────────────────────────────
 # 2.  Main generation loop
 # ────────────────────────────────────────────────
 if __name__ == "__main__":
-    import json
     from dotenv import load_dotenv, find_dotenv
-
     load_dotenv(find_dotenv())
 
-    # ★ 1. configure ElevenLabs ★
-    tts_engine = PhonemeTTSEngine(
-        api_key=os.environ["ELEVENLABS_API_KEY"],
-        voice_id=os.environ["ELEVENLABS_VOICE_ID"],
+    import os
+
+    # HARD-CODED PATHS – adjust as needed
+    CONFIG_PATH = "targets.json"         # Path to your JSON config
+    TMP_DIR = "./_tmp_cvc"                # Temp folder for intermediate files
+
+    # Get API key and fallback/default voice
+    api_key = os.environ["ELEVENLABS_API_KEY"]
+    default_voice_id = os.environ["ELEVENLABS_VOICE_ID"]
+
+    # Load all run configs from JSON file
+    runs = load_cvc_runs(CONFIG_PATH)
+
+    # Run each config using the shared API key
+    run_cvc_from_configs(
+        runs,
+        api_key=api_key,
+        default_voice_id=default_voice_id,
+        base_tmp_dir=TMP_DIR,
     )
 
-    # ★ 2. define your input set + targets ★
-    items = [
-        ("B EH G", "beg"),
-    ]
-    vowel_df = parse_vowel_dist_data(file_path='../../input_data/vowel_stats.txt')
-
-    # targets = {
-    #     "AH": generate_vowel_target_list(
-    #         vowel_df,
-    #         target_vowels=["AE","UH", "AA", "EH", ],
-    #         f0=99,
-    #         f3=2708,
-    #         f4=3603,
-    #         group="STIMULI"
-    #     )
-    # }
-    f0 = 100
-    f3 = 2580
-    f4 = 3272
-    IH = {"label": "IH", "f1": 502, "f2":   1882,"f3":2596,"f4":3403} #513,1875;503,1860;512,1890;
-    AE = {"label": "AE", "f1": 668, "f2": 1864,  "f3":2596,"f4":3403} #666,1875;661,1860;668,1890;
-                                                 #153;0000;158;0000;???;0000;
-    targets = {
-        "EH": interpolate_formant_targets(IH,AE,  n_subdivisions=1)
-    }
-
-    print(targets)
-
-    # ★ 3. run generation ★
-    generate_cvc_dataset(
-        vowel_length=0.13,
-        cvc_items=items,
-        vowel_targets=targets,
-        tts=tts_engine,
-        output_root="./generated_cvc",
-        pad_ms=[-0.0196+CROSSFADE_TIME/1000, -0.032-CROSSFADE_TIME/1000],
-
-    )
-
-    print("F1\tF2\tLabel")
-    for vowel, target_list in targets.items():
-        for t in target_list:
-            if "f1" in t and "f2" in t and "label" in t:
-                print(f"\t{t['label']}\t{t['f1']:.2f}\t{t['f2']:.2f}")
-
-    print("Dataset written to ./generated_cvc – happy modelling! ☺")
-
+    print("All runs complete.")
