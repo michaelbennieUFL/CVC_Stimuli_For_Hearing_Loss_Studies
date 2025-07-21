@@ -206,6 +206,17 @@ def match_loudness(reference_wav: Path, target_wav: Path):
 
 
 # ───────────────────────────────────────── analyse_formants ──────────────────────────────────────────
+
+
+def compute_trimmed_f0(f0_values, lower=35, upper=45):
+    """
+    Computes mean F0 within a specified middle percentile range.
+    """
+    q1 = np.percentile(f0_values, lower)
+    q3 = np.percentile(f0_values, upper)
+    iqr_values = f0_values[(f0_values >= q1) & (f0_values <= q3)]
+    return iqr_values.mean() if len(iqr_values) > 0 else None
+
 def analyse_formants(
     wav_path: str | Path,
     f0_min: int = 60,
@@ -224,10 +235,15 @@ def analyse_formants(
             if not np.isnan(val):
                 f_tracks[ch].append(val)
 
+    # Compute F0 values
     pitch = sound.to_pitch()
-    f0_voiced = pitch.selected_array["frequency"][pitch.selected_array["frequency"] > 0]
+    f0_values = pitch.selected_array["frequency"]
+    f0_values = f0_values[f0_values > 0]  # Remove unvoiced
 
-    means = [float(np.mean(f0_voiced))] + [float(np.mean(track)) for track in f_tracks]
+    # Compute trimmed mean F0
+    mean_f0 = compute_trimmed_f0(f0_values)
+
+    means = [float(mean_f0)] + [float(np.mean(track)) for track in f_tracks]
     return np.array(means[:6])  # F0 … F5
 
 
