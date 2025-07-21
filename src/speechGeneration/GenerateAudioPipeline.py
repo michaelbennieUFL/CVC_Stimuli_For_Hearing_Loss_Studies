@@ -421,8 +421,8 @@ if __name__ == "__main__":
     f0 = 100
     f3 = 2580
     f4 = 3272
-    IH = {"label": "IH", "f1": 512.5, "f2":   1878,"f3":2596,"f4":3403} #513,1875;503,1860;512,1890;
-    AE = {"label": "AE", "f1": 665.5, "f2": 1864,  "f3":2596,"f4":3403} #666,1875;661,1860;668,1890;
+    IH = {"label": "IH", "f1": 502, "f2":   1882,"f3":2596,"f4":3403} #513,1875;503,1860;512,1890;
+    AE = {"label": "AE", "f1": 668, "f2": 1864,  "f3":2596,"f4":3403} #666,1875;661,1860;668,1890;
                                                  #153;0000;158;0000;???;0000;
     targets = {
         "EH": interpolate_formant_targets(IH,AE,  n_subdivisions=1)
@@ -437,7 +437,7 @@ if __name__ == "__main__":
         vowel_targets=targets,
         tts=tts_engine,
         output_root="./generated_cvc",
-        pad_ms=[-0.0196+CROSSFADE_TIME/1000, -0.042-CROSSFADE_TIME/1000],
+        pad_ms=[-0.0196+CROSSFADE_TIME/1000, -0.032-CROSSFADE_TIME/1000],
 
     )
 
