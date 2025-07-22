@@ -218,7 +218,7 @@ def compute_trimmed_f0(f0_values, lower=30, upper=47):
     return iqr_values.mean() if len(iqr_values) > 0 else None
 
 
-def mean_middle_percent(values: np.ndarray, middle_percent: float = 0.70) -> float:
+def mean_middle_percent(values: np.ndarray, middle_percent: float = 0.30) -> float:
     """
     Compute the mean of the middle `middle_percent` values by index.
     Does not sort by value – just trims based on position.

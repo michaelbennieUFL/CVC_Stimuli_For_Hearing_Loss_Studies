@@ -143,7 +143,7 @@ def generateAllCVC(word_set) -> dict:
     for plosive in wordCategoryList["Consonants_Voiced"]:
         plosive_initals = CMUreader.filterByLetters(word_set, [plosive])
         plosive_initals = CMUreader.filterByPhonemeCount(plosive_initals, 3, int.__eq__)
-        plosive_initals = CMUreader.filterByLetters(plosive_initals, wordCategoryList["Consonants_Voiced"], index=-1)
+        plosive_initals = CMUreader.filterByLetters(plosive_initals, wordCategoryList["Consonants_R_Nasals_NONE"], index=-1)
         plosive_initals = CMUreader.filterByLetters(plosive_initals, wordCategoryList["Vowels_All"], index=-2)
         plosive_initals = CMUreader.filterBySyllableCount(plosive_initals, 1, int.__eq__)
         if plosive_initals:

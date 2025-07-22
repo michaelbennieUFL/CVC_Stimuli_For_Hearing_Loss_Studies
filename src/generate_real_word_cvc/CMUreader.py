@@ -12,6 +12,8 @@ def generateWordCategoryLists():
         ],
         "Consonants_Stops_Unvoiced": ["P", "T", "K"],
         "Consonants_S": ["S"],
+        "Consonants_R": ["R"],
+        "Consonants_Nasals":["N","NG","M"],
         "Vowels_All": [
             "AA", "AE", "AH", "AO", "AX", "AXR", "AW", "AY",
             "EH", "ER", "EY", "IH", "IX", "IY", "OW", "OY",
@@ -39,6 +41,12 @@ def generateWordCategoryLists():
 
     category_dict["Consonants_Stops_NONE"] = list(
         set(category_dict["Consonants_All"]) - set(category_dict["Consonants_Stops"]))
+    category_dict["Consonants_R_NONE"] = list(
+        set(category_dict["Consonants_All"]) - set(category_dict["Consonants_R"]))
+
+
+    category_dict["Consonants_R_Nasals_NONE"] = list(
+        set(category_dict["Consonants_All"]) - set(category_dict["Consonants_R"]) - set(category_dict["Consonants_Nasals"]))
 
     category_dict["Consonants_Voiced"] = sorted(
         list(set(category_dict["Consonants_All"]) - set(category_dict["Consonants_Unvoiced"]))

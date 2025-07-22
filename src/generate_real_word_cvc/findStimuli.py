@@ -1,3 +1,5 @@
+import csv
+import math
 from typing import Tuple
 
 from src.generate_real_word_cvc.CMUreader import *
@@ -25,6 +27,40 @@ def _query_ngram_api(token: str) -> float:
         return float(data["ngrams"][0]["relTotalMatchCount"])
     except Exception as e:
         raise RuntimeError(f"ngram API failure for '{token}': {e}") from e
+
+
+import spacy
+
+nlp = spacy.load("en_core_web_sm")  # or 'en_core_web_md' if installed
+
+def get_lemma_spacy(word: str) -> str:
+    doc = nlp(word)
+    return doc[0].lemma_
+
+
+# --- Load COCA Spoken Relative Frequencies --------------------------
+N_SPOKEN = 81_916_566
+FREQ_FLOOR = 1 / N_SPOKEN  # ≈ 1.221e-8
+
+def load_spoken_freq_table(path: str = "./wordlist/coca_spoken_rank.tsv") -> dict:
+    freq = {}
+    with open(path, newline="", encoding="utf-8") as fh:
+        reader = csv.DictReader(fh, delimiter="\t")
+        for row in reader:
+            freq[row["Word"].upper()] = float(row["Spoken_Relative_Frequency"])
+    return freq
+
+COCA_SPOKEN_FREQ = load_spoken_freq_table()
+
+def get_spoken_freq_log10(word: str) -> float:
+    """
+    Return log10 of COCA Spoken Relative Frequency (or log10 of fallback if fake word).
+    """
+    f = COCA_SPOKEN_FREQ.get(word.upper(), FREQ_FLOOR)
+    if f==FREQ_FLOOR:
+        word =get_lemma_spacy(word)
+        f = COCA_SPOKEN_FREQ.get(word.upper(), FREQ_FLOOR)
+    return math.log10(f/(FREQ_FLOOR))
 
 
 # --- ❷  Public wrapper with fallback --------------------------------
@@ -143,25 +179,32 @@ from typing import List, Dict, Tuple
 # ---------------------------------------------------------------------
 #  Helper: build (C1,C2) → {vowel: word_record}
 # ---------------------------------------------------------------------
-def _index_c1vc2(cvc_word_list):
-    combos = defaultdict(dict)
+def _index_c1vc2(cvc_word_list: List[Dict[str, List[str]]]) -> Dict[Tuple[str, str], Dict[str, List[Dict]]]:
+    """
+    Returns (C1, C2) → {vowel → [word_record1, word_record2, ...]}
+    Keeps all matching words rather than overwriting.
+    """
+    combos = defaultdict(lambda: defaultdict(list))
     strip = lambda v: ''.join(ch for ch in v if not ch.isdigit())
 
     for entry in cvc_word_list:
-        pron = entry["pronunciation"]
-        if len(pron) != 3:
+        pron = entry.get("pronunciation")
+        if not pron or len(pron) != 3:
             continue
         c1, v, c2 = pron
-        combos[(c1, c2)][strip(v)] = entry       # last duplicate wins
+        base_v = strip(v)
+        combos[(c1, c2)][base_v].append(entry)
+
     return combos
 
+def max_word_and_freq_log10(word_records):
+    if not word_records:
+        return None, 0.0
+    best = max(word_records, key=lambda w: get_spoken_freq_log10(w["word"]))
+    return best["word"], max(get_spoken_freq_log10(best["word"]),0)
 
-# ---------------------------------------------------------------------
-#  New summariser (single row per C1–C2 with maximal coverage)
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-#  patched summarize_c1vc2_input_output_cases  (only rows.append part changed)
-# ---------------------------------------------------------------------
+
+
 def summarize_c1vc2_input_output_cases(
         cvc_word_list: List[Dict[str, List[str]]],
         category1_vowels: List[str],          # outer / “input” vowels
@@ -180,6 +223,45 @@ def summarize_c1vc2_input_output_cases(
     for (c1, c2), vmap in combos.items():
         have = set(vmap.keys())
 
+
+
+        # -----  New frequency columns --------------------------------
+        #  Outer_Left_Freq  = freq of first outer vowel (if present)
+        #  Outer_Right_Freq = freq of second outer vowel (if present)
+        outer_left_freq  = 0
+        outer_right_freq = 0
+        outer_Category_Words=["",""]
+        if len(Outer_Category_) >= 1 and Outer_Category_[0] in vmap:
+            outer_Category_Words[0],outer_left_freq = max_word_and_freq_log10(vmap[Outer_Category_[0]])
+        if len(Outer_Category_) >= 2 and Outer_Category_[1] in vmap:
+            outer_Category_Words[1],outer_right_freq = max_word_and_freq_log10(vmap[Outer_Category_[1]])
+
+
+        #  Middle_Mean_Freq = mean freq of ALL present inner-category words
+        present_inner = Inner_Category_ & have
+        inner_freqs = []
+        inner_words = []
+
+        for v in present_inner:
+            word, freq = max_word_and_freq_log10(vmap[v])
+            inner_words.append(word)
+            inner_freqs.append(freq)
+
+        middle_mean_freq = sum(inner_freqs) / len(inner_freqs) if inner_freqs else 0.0
+
+        original_length=len(Outer_Category_)
+        if outer_left_freq<0.01 and original_length>= 1 :
+            have.discard(Outer_Category_[0])
+            outer_Category_Words[0] = ""
+        if outer_right_freq<0.01 and original_length>= 2 :
+            have.discard(Outer_Category_[1])
+            outer_Category_Words[1]=""
+        if middle_mean_freq<0.01:
+            have.difference_update(Inner_Category_)
+            inner_words=[]
+
+        if "GOOD" in outer_Category_Words:
+            print("!!!!!!!!!!!!!")
         # -----  INPUT-side case  -----
         present_outer = [v for v in Outer_Category_ if v in have]
         if len(present_outer) == len(Outer_Category_):
@@ -198,22 +280,8 @@ def summarize_c1vc2_input_output_cases(
         else:
             output_case = "Mixed"
 
-        # -----  New frequency columns --------------------------------
-        #  Outer_Left_Freq  = freq of first outer vowel (if present)
-        #  Outer_Right_Freq = freq of second outer vowel (if present)
-        outer_left_freq  = 10**-10
-        outer_right_freq = 10**-10
 
-        if len(Outer_Category_) >= 1 and Outer_Category_[0] in vmap:
-            outer_left_freq = lookup_ngram_freq(vmap[Outer_Category_[0]]["word"])
-        if len(Outer_Category_) >= 2 and Outer_Category_[1] in vmap:
-            outer_right_freq = lookup_ngram_freq(vmap[Outer_Category_[1]]["word"])
 
-        #  Middle_Mean_Freq = mean freq of ALL present inner-category words
-        inner_freqs = [
-            lookup_ngram_freq(vmap[v]["word"]) for v in present_inner
-        ]
-        middle_mean_freq = sum(inner_freqs) / len(inner_freqs) if inner_freqs else 0.0
 
         rows.append({
             "C1": c1,
@@ -233,8 +301,8 @@ def summarize_c1vc2_input_output_cases(
             "Inner_Category_Vowel":  ",".join(sorted(Inner_Category_)),
             "Outer_Category_Present":",".join(sorted(present_outer)),
             "Inner_Category_Present":",".join(sorted(present_inner)),
-            "Outer_Category_Words":  ",".join(vmap[v]["word"] for v in present_outer),
-            "Inner_Category_Words":  ",".join(vmap[v]["word"] for v in present_inner),
+            "Outer_Category_Words":  ",".join(v for v in outer_Category_Words),
+            "Inner_Category_Words":  ",".join(inner_words),
         })
 
     # ----------  sort & export as before ----------
@@ -326,12 +394,12 @@ if __name__ == "__main__":
     )
     filtered_word_set = filter_cmudict_words(original_word_set, unique_l2_words)
 
-    result_sets = generateTestWordList(filtered_word_set)
+    result_sets = generateTestWordList(original_word_set)
     voiced_cvc  = result_sets["Voiced CVC"]
 
     # quick test
-    print("results:", find_words_with_substring(voiced_cvc, "gym"))
-
+    print("results:", find_words_with_substring(voiced_cvc, "bat"))
+    print("results:", find_words_with_substring(voiced_cvc, "bhatt"))
     # ---------- Define (Cat-1, Cat-2) jobs ----------
     MONOTHONG_JOBS = [
         ("Job1_Inner_Category__AA_AH_UH", ["IH", "AE"], ["EH"])

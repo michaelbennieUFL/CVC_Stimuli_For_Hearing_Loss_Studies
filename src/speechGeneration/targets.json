@@ -1,5 +1,20 @@
 [
+      {
+    "output_root": "./generated_cvc_final/lig_lag_leg_run",
+    "items": [
 
-
-
+      ["D EH SH", "desh"]
+    ],
+    "f0f3f4": { "f3": 2596, "f4": 3403 },
+    "vowel_targets": [
+      { "vowel": "IH", "f1": 485, "f2": 1882, "label": "IH" },
+      { "vowel": "AE", "f1": 668, "f2": 1852, "label": "AE" }
+    ],
+    "targets": ["EH"],
+    "vowel_length": 0.13,
+    "pad_ms": [-0.0026, 0.042],
+    "crossfade_time": 1,
+    "tolerance": 1.4,
+    "max_percent_distance": 0.002
+  }
 ]
