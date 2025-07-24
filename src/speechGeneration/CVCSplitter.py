@@ -9,7 +9,7 @@ import math
 import warnings
 from pathlib import Path
 import re, subprocess
-from typing import Iterable, Dict, List, Tuple
+from typing import Iterable, Dict, List, Tuple, Union
 import pydub
 from pydub import AudioSegment
 import librosa
@@ -308,26 +308,85 @@ def safe_append(audio1: AudioSegment, audio2: AudioSegment, crossfade_time=CROSS
 
     min_duration = min(len(audio1), len(audio2))  # ms
     crossfade_ms = max(crossfade_time, min_duration // 200)     # 6–100 ms
+
+
+
     return audio1.append(audio2, crossfade=crossfade_ms)
 
 
 
+def _match_rms(audio: AudioSegment, target_dBFS: float) -> AudioSegment:
+    """Return *audio* gain‑adjusted so that its RMS equals *target_dBFS*."""
+    print("Current dBFS:", audio.dBFS)
+    print("Target dBFS:", target_dBFS)
+    print(
+        "Adjusting volume to match target RMS of",
+        target_dBFS,
+        "dBFS",
+    )
+    return audio.apply_gain(target_dBFS - audio.dBFS)
 
-def recombine_cvc_audio(
-    mod_vowel_path: str | Path,
-    c1_path: str | Path,
-    c2_path: str | Path,
+
+def _scale_linear(audio: AudioSegment, factor: float) -> AudioSegment:
+    """
+    Multiply the signal by *factor* (linear).  Internally this is a gain
+    change of 20·log10(factor) dB, which works for any positive *factor*.
+    """
+    if factor <= 0:
+        raise ValueError("vowel_volume_scaling_factor must be > 0")
+    return audio.apply_gain(20 * math.log10(factor))
+
+
+def _trim_vowel(
+    audio: AudioSegment,
     *,
+    remove_noise: bool,
+    buffer_sec: float,
+    target_len: float | None,
+    trim_style: str,
+) -> AudioSegment:
+    """Remove the synthetic noise buffer and optionally centre‑trim to *target_len*."""
+    if remove_noise:
+        audio = audio[buffer_sec * 1000 : -buffer_sec * 1000]
+
+    if target_len is not None:
+        excess = audio.duration_seconds - target_len
+        if excess < 0:
+            raise ValueError(f"Vowel shorter than target length ({audio.duration_seconds:.3f}s < {target_len:.3f}s)")
+        if trim_style == "keep_middle":
+            start_off = excess / 2
+        elif trim_style == "keep_start":
+            start_off = 0.0
+        elif trim_style == "keep_end":
+            start_off = excess
+        else:
+            raise ValueError(f"Unknown trim_style '{trim_style}'")
+        audio = audio[start_off * 1000 : (start_off + target_len) * 1000]
+
+    return audio
+
+
+def recombine_cvc_audio(               # ← NEW SIGNATURE
+    mod_vowel_path: Union[str, Path],
+    c1_path: Union[str, Path],
+    c2_path: Union[str, Path],
+    *,
+    # ————— new arguments ———————————————————————————————————————————————————
+    reference_vowel_path: Union[str, Path] | None = None,
+    vowel_volume_scaling_factor: float = 1.0,
+    # ————— existing arguments (unchanged defaults) ———————————————
     vowel_phoneme: str = "AE",
     dictionary: str = "english_us_arpa",
     acoustic_model: str | None = None,
     tg_format: str = "short_textgrid",
-    out_path: str | Path | None = None,
+    out_path: Union[str, Path, None] = None,
     remove_noise_buffer: bool = True,
     noise_buffer_duration: float = 0.15,
-    vowel_length: float = 0.10,
+    vowel_length: float | None = 0.10,
     final_buffer_duration: float | None = 0.5,
-    crossfade_time=CROSSFADE_TIME,
+    crossfade_time: int | Tuple[int, int] = 3,
+    c1_scale: float = 1.0,
+    trim_style: str = "keep_middle",
 ) -> Path:
     """
     Trim (optionally) buffered noise from a modified V file and stitch it
@@ -346,6 +405,8 @@ def recombine_cvc_audio(
     vowel_length   : length in seconds
     final_buffer_duration : Optional float, duration (seconds) of silence to
                             add to the beginning and end of final output.
+    trim_style : One of {'keep_start', 'keep_middle', 'keep_end'}, determines
+                 which part of the vowel to keep when trimming.
     """
     p_mod = Path(mod_vowel_path).expanduser().resolve()
     p_c1 = Path(c1_path).expanduser().resolve()
@@ -355,33 +416,71 @@ def recombine_cvc_audio(
     )
 
     audio_c1 = AudioSegment.from_wav(p_c1)
+
+    if isinstance(crossfade_time, (tuple, list)) and len(crossfade_time) == 2:
+        xfade_c1_v, xfade_v_c2 = crossfade_time
+    else:
+        xfade_c1_v = xfade_v_c2 = int(crossfade_time)
+
+    # Apply C1 volume scaling
+    if c1_scale != 1.0:
+        if c1_scale <= 0:
+            raise ValueError(f"c1_scale must be positive, got {c1_scale}")
+        print("Current C1 dBFS:", audio_c1.dBFS)
+        audio_c1 = _scale_linear(audio_c1, c1_scale)
+        print("New C1 dBFS:", audio_c1.dBFS)
+
+
     audio_v = AudioSegment.from_wav(p_mod)
     audio_c2 = AudioSegment.from_wav(p_c2)
 
-    # Remove noise buffer from vowel
-    if remove_noise_buffer:
-        length = audio_v.duration_seconds
-        audio_v = audio_v[noise_buffer_duration * 1000 : (length - noise_buffer_duration) * 1000]
 
-    # Trim to target vowel length
-    if vowel_length:
-        actual_length = audio_v.duration_seconds
-        if actual_length < vowel_length:
-            raise ValueError(f"Vowel is shorter than target length: {actual_length} < {vowel_length}")
-        offset = (actual_length - vowel_length) / 2
-        audio_v = audio_v[offset * 1000 : (offset + vowel_length) * 1000]
+
+
+
+    ref_v = None
+    if reference_vowel_path:
+        ref_v = AudioSegment.from_wav(Path(reference_vowel_path).expanduser().resolve())
+
+
+
+    audio_v = _trim_vowel(
+        audio_v,
+        remove_noise=remove_noise_buffer,
+        buffer_sec=noise_buffer_duration,
+        target_len=vowel_length,
+        trim_style=trim_style,
+    )
+    if ref_v is not None:
+        ref_v = _trim_vowel(
+            ref_v,
+            remove_noise=remove_noise_buffer,
+            buffer_sec=noise_buffer_duration,
+            target_len=vowel_length,
+            trim_style=trim_style,
+        )
+
+
+    # ---- RMS‑match to reference (if provided) --------------------------------------
+    if ref_v is not None:
+        audio_v = _match_rms(audio_v, ref_v.dBFS)
+        print("Current dBFS:", audio_v.dBFS)
+
+    # ---- optional extra scaling ----------------------------------------------------
+    if vowel_volume_scaling_factor != 1.0:
+        audio_v = _scale_linear(audio_v, vowel_volume_scaling_factor)
 
     dur_c1, dur_c2 = len(audio_c1), len(audio_c2)
 
     if dur_c1 == 0 and dur_c2 == 0:
         audio_cvc = audio_v  # V only
     elif dur_c1 == 0:
-        audio_cvc = safe_append(audio_v, audio_c2,crossfade_time)  # V + C2
+        audio_cvc = safe_append(audio_v, audio_c2, xfade_v_c2)  # V + C2
     elif dur_c2 == 0:
-        audio_cvc = safe_append(audio_c1, audio_v,crossfade_time)  # C1 + V
+        audio_cvc = safe_append(audio_c1, audio_v, xfade_c1_v)  # C1 + V
     else:
-        audio_cv = safe_append(audio_c1, audio_v,crossfade_time)  # (C1 + V) + C2
-        audio_cvc = safe_append(audio_cv, audio_c2,crossfade_time)
+        audio_cv = safe_append(audio_c1, audio_v, xfade_c1_v)  # (C1 + V)
+        audio_cvc = safe_append(audio_cv, audio_c2, xfade_v_c2)  # ... + C2
 
     # Add silence before and after if specified
     if final_buffer_duration is not None and final_buffer_duration > 0:
@@ -389,10 +488,11 @@ def recombine_cvc_audio(
         audio_cvc = silence + audio_cvc + silence
 
     # Normalize loudness
-    audio_cvc = match_rms(audio_cvc, target_dBFS=-20.0)
+    audio_cvc = match_rms(audio_cvc, target_dBFS=-27.0)
     audio_cvc.export(out_p, format="wav")
 
     return out_p
+
 
 
 

@@ -256,7 +256,7 @@ def make_figure(sub, f1_bark, f2_bark, scales=('hz', 'bark', 'mel', 'erb'), scal
 # -------------- DASH APP --------------
 
 file_path = '../../input_data/vowel_stats.txt'  # update path as needed
-gender = 'PBm'  # or 'cbm', etc.
+gender = 'm'  # or 'cbm', etc.
 scales = ('hz', 'bark', 'mel', 'erb')
 scale = 2
 

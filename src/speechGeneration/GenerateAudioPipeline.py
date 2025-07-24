@@ -98,7 +98,10 @@ def generate_vowel_variants(
     max_iters: int = 40,
     crossfade_time=3,
     vowel_length=None,
-    max_percent_distance=0.002
+trim_style="keep_middle",
+    max_percent_distance=0.002,
+vowel_volume_scaling_factor=0.3,
+c1_scale=1,
 ) -> List[Tuple[Path, str]]:
     """Create *n* vowel‑tuned versions of an existing vowel chunk.
 
@@ -129,36 +132,51 @@ def generate_vowel_variants(
     rebuilt: List[Tuple[Path, str]] = []
 
     for i, spec in enumerate(targets):
-        # 1) run HiFi‑Glot optimisation --------------------------------------
-        tgt_out = dest_dir / f"tuned_{i}"
-        tgt_out.mkdir(parents=True, exist_ok=True)
+        pregenerated = (
+                   spec.get("pregenerated_vowel_location")  # preferred name
+         or spec.get("optimized_vowel_location")  # legacy/alias
+        )
 
-        try:
-            _, achieved = tune_formants(
-                wav_file=vowel_wav,
-                output_dir=tgt_out,
-                target=spec,
-                tolerance=tolerance,
-                max_iters=max_iters,
-                max_percent_distance=max_percent_distance
-            )
-        except RuntimeError as e:
-            print(f"[WARN] Formant tuning #{i} failed: {e}")
-            continue
+        if pregenerated:
+            mod_vowel = Path(pregenerated).expanduser().resolve()
+            if not mod_vowel.exists():
+                print(f"[WARN] Missing pregenerated vowel «{pregenerated}» – skipping spec.")
+                continue
+        else:
+            # 1) run HiFi-Glot optimisation as before
+            tgt_out = dest_dir / f"tuned_{i}"
+            tgt_out.mkdir(parents=True, exist_ok=True)
+            try:
+                _, _ = tune_formants(
+                       wav_file = vowel_wav,
+                   output_dir = tgt_out,
+                   target = spec,
+                   tolerance = tolerance,
+                   max_iters = max_iters,
+                   max_percent_distance = max_percent_distance,
+                   vowel_volume_scaling_factor = 1.0,
+                )
+            except RuntimeError as e:
+               print(f"[WARN] Formant tuning #{i} failed: {e}")
+               continue
+            mod_vowel = _latest_wav(tgt_out)
 
-        mod_vowel = _latest_wav(tgt_out)
-
-        # 2) stitch back into C1 + C2 ----------------------------------------
+            # 2) stitch back into C1 + C2 ----------------------------------------
         label = spec.get("label", f"var{i}")
         out_path = dest_dir / f"cvc_variant_{vowel_phoneme}_{label}.wav"
         recombine_cvc_audio(
+            c1_scale=c1_scale,
             mod_vowel_path=mod_vowel,
             c1_path=c1_path,
             c2_path=c2_path,
             vowel_phoneme=vowel_phoneme,
             out_path=out_path,
             vowel_length=vowel_length,
-            crossfade_time=crossfade_time
+            trim_style=trim_style,
+            crossfade_time=crossfade_time,
+            reference_vowel_path=vowel_wav,
+            vowel_volume_scaling_factor=vowel_volume_scaling_factor,
+
         )
         rebuilt.append((out_path, label))
 
@@ -226,6 +244,8 @@ def generate_cvc_dataset(
     cvc_items: Sequence[Tuple[str, str]],
     vowel_targets: Dict[str, Sequence[Dict[str, float]]],
     vowel_length=None,
+trim_style="keep_middle",
+c1_scale=1,
     *,
     tts: PhonemeTTSEngine,
     base_tmp_dir: Path | str = "./_tmp_cvc",
@@ -235,8 +255,13 @@ def generate_cvc_dataset(
     max_iters: int = 40,
     crossfade_time: int = 3,
     max_percent_distance=0.03,
+    regenerate_audio: bool = True,
+    fixed_c1_path: str | Path | None = None,
+    fixed_c2_path: str | Path | None = None,
+vowel_volume_scaling_factor=0.3,
     **generate_split_kwargs,
 ) -> None:
+
     """End‑to‑end generation of a labelled CVC dataset **plus discordants**.
 
     Adds parameters for formant tuning precision (tolerance), iteration cap,
@@ -254,7 +279,10 @@ def generate_cvc_dataset(
 
         # 1. synthesize base word
         raw_cvc_path = work_dir / f"{slug}_base.wav"
-        tts.speak_phonemes(phoneme_str, output_path=str(raw_cvc_path))
+        if regenerate_audio or not raw_cvc_path.exists():
+            tts.speak_phonemes(phoneme_str, output_path=str(raw_cvc_path))
+        else:
+            print(f"[INFO] Skipping TTS synthesis for '{word}' – reusing existing audio.")
 
         # 2. split into C1 / V / C2
         split_args = dict(
@@ -268,6 +296,11 @@ def generate_cvc_dataset(
 
         c1_path, v_path, c2_path = generate_splitAudio(**split_args)
 
+        if fixed_c1_path:
+            c1_path = Path(fixed_c1_path).expanduser().resolve()
+        if fixed_c2_path:
+            c2_path = Path(fixed_c2_path).expanduser().resolve()
+
         # 3. get vowel and variants
         vowel = _extract_vowel(phoneme_str)
         specs = vowel_targets.get(vowel, [])
@@ -280,7 +313,9 @@ def generate_cvc_dataset(
 
         # Copy reference chunks
         for p in (c1_path, v_path, c2_path):
-            shutil.copy2(p, dest_dir / p.name)
+            dst = dest_dir / p.name
+            if p.resolve() != dst.resolve():
+                shutil.copy2(p, dst)
 
         variant_pairs = generate_vowel_variants(
             vowel_wav=v_path,
@@ -293,7 +328,10 @@ def generate_cvc_dataset(
             max_iters=max_iters,
             vowel_length=vowel_length,
             crossfade_time=crossfade_time,
-            max_percent_distance=max_percent_distance
+            max_percent_distance=max_percent_distance,
+        vowel_volume_scaling_factor=vowel_volume_scaling_factor,
+        trim_style=trim_style,
+            c1_scale=c1_scale,
         )
 
         # 4. Create discordant stereo pairs
@@ -489,11 +527,46 @@ def load_cvc_runs(json_data_or_path: Union[str, Path, list]) -> List[dict]:
 
         cfg_norm = dict(cfg)  # shallow copy
 
+        cfg_norm["fixed_c1_path"] = cfg.get("c1_path") or None
+        cfg_norm["fixed_c2_path"] = cfg.get("c2_path") or None
+
+        trim_style = cfg.get("trim_style", "keep_middle")
+        if trim_style not in {"keep_start", "keep_middle", "keep_end"}:
+            print(f"[WARN] Unknown trim_style '{trim_style}' in run #{i}, defaulting to 'keep_middle'")
+            trim_style = "keep_middle"
+        cfg_norm["trim_style"] = trim_style
+
+        cfg_norm["vowel_volume_scaling_factor"]=float(cfg.get("vowel_volume_scaling_factor", 0.3))
+
+        c1_scale = cfg.get("c1_scale", 1.0)
+        try:
+            c1_scale = float(c1_scale)
+            if c1_scale <= 0:
+                raise ValueError
+        except ValueError:
+            print(f"[WARN] Invalid c1_scale in run #{i} – must be a positive float. Defaulting to 1.0.")
+            c1_scale = 1.0
+        cfg_norm["c1_scale"] = c1_scale
+
         cfg_norm["items"] = _coerce_items(cfg["items"])
         cfg_norm["pad_ms"] = _coerce_pad_ms(cfg.get("pad_ms"))
-        cfg_norm["crossfade_time"] = int(cfg.get("crossfade_time", 3))
+        xfade = cfg.get("crossfade_time", 3)
+        if isinstance(xfade, (list, tuple)) and len(xfade) == 2:
+            try:
+                xfade = (int(xfade[0]), int(xfade[1]))
+            except (ValueError, TypeError):
+                print(f"[WARN] Invalid crossfade_time pair in run #{i}, defaulting to 3.")
+                xfade = 3
+        elif isinstance(xfade, (int, float)):
+            xfade = int(xfade)
+        else:
+            print(f"[WARN] Invalid crossfade_time format in run #{i}, defaulting to 3.")
+            xfade = 3
+
+        cfg_norm["crossfade_time"] = xfade
         cfg_norm["tolerance"] = float(cfg.get("tolerance", 50.0))
         cfg_norm["max_percent_distance"] = float(cfg.get("max_percent_distance", 0.03))
+        cfg_norm["regenerate_audio"] = bool(cfg.get("regenerate_audio", True))
         if "vowel_length" in cfg_norm and cfg_norm["vowel_length"] is not None:
             cfg_norm["vowel_length"] = float(cfg_norm["vowel_length"])
         else:
@@ -520,8 +593,9 @@ def run_cvc_from_configs(
     """
     for r in runs:
         voice_id = r.get("voice_id", default_voice_id)
-        tts_engine = PhonemeTTSEngine(api_key=api_key, voice_id=voice_id)
-
+        tts_engine=None
+        if r["regenerate_audio"]:
+            tts_engine = PhonemeTTSEngine(api_key=api_key, voice_id=voice_id)
         generate_cvc_dataset(
             cvc_items=r["items"],
             vowel_targets=r["targets"],        # already normalized mapping
@@ -534,6 +608,12 @@ def run_cvc_from_configs(
             max_iters=int(r.get("max_iters", 850)),  # allow override though not numbered; fallback 40
             crossfade_time=r["crossfade_time"],
             max_percent_distance=r["max_percent_distance"],
+            regenerate_audio=r["regenerate_audio"],
+            trim_style=r["trim_style"],
+            c1_scale=r["c1_scale"],
+            fixed_c1_path = r["fixed_c1_path"],
+            fixed_c2_path = r["fixed_c2_path"],
+            vowel_volume_scaling_factor=r["vowel_volume_scaling_factor"],
             **generate_split_kwargs,
         )
 

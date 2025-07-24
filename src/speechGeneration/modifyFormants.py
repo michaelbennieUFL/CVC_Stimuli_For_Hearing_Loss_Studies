@@ -98,6 +98,7 @@ def refine_with_basinhopping(
             feature_scale=scales.tolist(),
         )
         latest = max(output_dir.glob("*.wav"), key=lambda p: p.stat().st_mtime)
+
         current = analyse_formants(latest)[:5]
 
         table = Table(title="Basin-hop")
@@ -208,17 +209,40 @@ def match_loudness(reference_wav: Path, target_wav: Path):
 # ───────────────────────────────────────── analyse_formants ──────────────────────────────────────────
 
 
-def compute_trimmed_f0(f0_values, lower=30, upper=47):
+
+
+def compute_trimmed_f0(f0_values, lower=15, upper=85, max_f0=250):
     """
-    Computes mean F0 within a specified middle percentile range.
+    Computes mean F0 within a specified percentile range,
+    ignoring F0 values above `max_f0`. If trimmed result is empty,
+    falls back to the mean of the two lowest F0 values.
     """
+    f0_values = np.array(f0_values)
+    f0_values = f0_values[~np.isnan(f0_values)]      # remove NaNs
+    f0_values = f0_values[f0_values <= max_f0]       # exclude high F0s
+
+    if len(f0_values) == 0:
+        print("[WARN] compute_trimmed_f0(): No valid F0 values after filtering.")
+        return None
+
     q1 = np.percentile(f0_values, lower)
     q3 = np.percentile(f0_values, upper)
     iqr_values = f0_values[(f0_values >= q1) & (f0_values <= q3)]
-    return iqr_values.mean() if len(iqr_values) > 0 else None
+
+    if len(iqr_values) > 0:
+        return iqr_values.mean()
+
+    print("[WARN] compute_trimmed_f0(): No values in IQR range — falling back to bottom two values.")
+    sorted_f0 = np.sort(f0_values)
+    if len(sorted_f0) >= 2:
+        return np.mean(sorted_f0[:2])
+    else:
+        return float(sorted_f0[0])  # only one value left
 
 
-def mean_middle_percent(values: np.ndarray, middle_percent: float = 0.30) -> float:
+
+
+def mean_middle_percent(values: np.ndarray, middle_percent: float = 0.40) -> float:
     """
     Compute the mean of the middle `middle_percent` values by index.
     Does not sort by value – just trims based on position.
@@ -241,7 +265,7 @@ def mean_middle_percent(values: np.ndarray, middle_percent: float = 0.30) -> flo
 def analyse_formants(
     wav_path: str | Path,
     f0_min: int = 60,
-    f0_max: int = 450,
+    f0_max: int = 250,
     max_formant: int = 5_500,
 ) -> np.ndarray:
     sound = parselmouth.Sound(str(wav_path))
@@ -257,13 +281,13 @@ def analyse_formants(
                 f_tracks[ch].append(val)
 
     # Compute F0 values
-    pitch = sound.to_pitch()
+    pitch = praat.call(sound, "To Pitch", 0.001, f0_min, f0_max)
     f0_values = pitch.selected_array["frequency"]
     f0_values = f0_values[f0_values > 0]  # Remove unvoiced
-
     # Compute trimmed mean F0
     mean_f0 = compute_trimmed_f0(f0_values)
-
+    if mean_f0 is None:
+        print(f0_values)
     means = [float(mean_f0)] + [float(mean_middle_percent(track)) for track in f_tracks]
     return np.array(means[:6])  # F0 … F5
 
@@ -478,7 +502,7 @@ def tune_formants(
     adam_lr: float = 0.005,
     freeze_tol: float = 0.001,
     default_f0=True,
-max_percent_distance=0.011) -> Tuple[List[float], List[float]]:
+max_percent_distance=0.011, vowel_volume_scaling_factor=0.9) -> Tuple[List[float], List[float]]:
     """
     Optimise HiFi-Glot's five feature-scale factors to hit the requested formants,
     using Adam instead of binary search.
@@ -559,7 +583,17 @@ max_percent_distance=0.011) -> Tuple[List[float], List[float]]:
 
 
         # Continue with current formant analysis
-        current = analyse_formants(latest_output)[:5]
+        try:
+            current = analyse_formants(latest_output)[:5]
+        except:
+            console.print("[red]NaN encountered in f0 formant analysis – applying jitter to escape.[/red]")
+            jitter = np.random.uniform(-0.01, 0.01, size=scales.shape)
+            scales = np.clip(scales + jitter, 0.1, 3.5)
+
+            # Apply soft reduction to F0 scale
+            scales[0] = np.clip(scales[0] ** 0.8, 0.1, 3.5)
+
+            continue
 
         # ──────────────── debug table ─────────────────
         table = Table(title=f"Iteration {it} – Adam")
@@ -612,7 +646,7 @@ max_percent_distance=0.011) -> Tuple[List[float], List[float]]:
             original_rms = calculate_rms_volume(in_wav)
             current_rms = calculate_rms_volume(latest_output)
             print("Loudness ratio:(pre-norm) :", current_rms / original_rms)
-            normalize_volume(latest_output, original_rms*0.3)
+            normalize_volume(latest_output, original_rms * vowel_volume_scaling_factor)
             # match_loudness(in_wav, latest_output)
             current_rms = calculate_rms_volume(latest_output)
             print("Loudness ratio:(pos-norm) :", current_rms / original_rms)
