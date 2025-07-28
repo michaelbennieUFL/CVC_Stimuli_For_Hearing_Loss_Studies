@@ -164,6 +164,10 @@ c1_scale=1,
             # 2) stitch back into C1 + C2 ----------------------------------------
         label = spec.get("label", f"var{i}")
         out_path = dest_dir / f"cvc_variant_{vowel_phoneme}_{label}.wav"
+
+        ref_vowel = mod_vowel if pregenerated else vowel_wav
+
+
         recombine_cvc_audio(
             c1_scale=c1_scale,
             mod_vowel_path=mod_vowel,
@@ -174,7 +178,7 @@ c1_scale=1,
             vowel_length=vowel_length,
             trim_style=trim_style,
             crossfade_time=crossfade_time,
-            reference_vowel_path=vowel_wav,
+            reference_vowel_path=ref_vowel,
             vowel_volume_scaling_factor=vowel_volume_scaling_factor,
 
         )
@@ -469,12 +473,8 @@ def _expand_vowel_targets_if_needed(cfg: dict) -> Dict[str, Sequence[Dict[str, f
 
         for label, row in label_map.items():
             # copy row so we don't modify original
-            spec = {
-                "label": label,
-                "f1": row["f1"],
-                "f2": row["f2"],
-            }
-
+            spec = dict(row)
+            spec["label"] = label
             for k in ("f0", "f3", "f4"):
                 if k in row:
                     spec[k] = row[k]

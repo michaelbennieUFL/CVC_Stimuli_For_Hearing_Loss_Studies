@@ -1,13 +1,15 @@
 [
-  {
-    "output_root": "./generated_cvc_final/dedge_run/low_f0",
+
+    {
+    "output_root": "./generated_cvc_final/dedge_run/high_f0",
     "items": [
       ["L EH JH", "ledge"]
     ],
-    "f0f3f4": { "f0": 130, "f3": 2841, "f4": 3377 },
+    "f0f3f4": { "f0": 145.92, "f3": 2841, "f4": 3568 },
     "vowel_targets": [
+            { "vowel": "AE", "f1": 765.000, "f2": 1624.0, "label": "AE_Optimized" },
+
       { "vowel": "EH", "f1": 556.000, "f2": 1791.000, "label": "EH_PNW" },
-      { "vowel": "AE", "f1": 750.000, "f2": 1610.000, "label": "AE_Optimized" },
       { "vowel": "IH", "f1": 441.000, "f2": 1942.000, "label": "IH_PNW" },
 
 
@@ -19,27 +21,28 @@
     ],
     "targets": ["EH"],
     "vowel_length": 0.19,
-    "pad_ms": [-0.0200, -0.16],
-    "crossfade_time": [8, 20],
-    "tolerance": 0.79,
+    "pad_ms": [-0.0200, -0.169],
+    "crossfade_time": [6, 20],
+    "tolerance": 0.87,
     "regenerate_audio": false,
-    "max_percent_distance": 0.0027,
-    "vowel_volume_scaling_factor": 1.0,
+    "max_percent_distance": 0.0035,
+    "vowel_volume_scaling_factor": 0.8,
     "c1_scale": 0.4,
     "trim_style": "keep_end",
     "c1_path": "./generated_cvc_final/dish_desh_dash_run/low_f0/desh/desh_C1_20250724125823.wav",
     "c2_path": "./generated_cvc_final/dedge_run/low_f0/ledge/ledge_C2_good.wav"
 
   },
+
   {
-    "output_root": "./generated_cvc_final/deaf_run/high_f0",
+    "output_root": "./generated_cvc_final/dedge_run/low_f0",
     "items": [
       ["L EH JH", "ledge"]
     ],
-    "f0f3f4": { "f0": 145.92, "f3": 2841, "f4": 3377 },
+    "f0f3f4": { "f0": 130, "f3": 2841, "f4": 3568 },
     "vowel_targets": [
       { "vowel": "EH", "f1": 556.000, "f2": 1791.000, "label": "EH_PNW" },
-      { "vowel": "AE", "f1": 750.000, "f2": 1610.000, "label": "AE_Optimized" },
+      { "vowel": "AE", "f1": 765.000, "f2": 1624.0, "label": "AE_Optimized" },
       { "vowel": "IH", "f1": 441.000, "f2": 1942.000, "label": "IH_PNW" },
 
 
@@ -51,12 +54,12 @@
     ],
     "targets": ["EH"],
     "vowel_length": 0.19,
-    "pad_ms": [-0.0200, -0.16],
-    "crossfade_time": [8, 20],
-    "tolerance": 0.79,
+    "pad_ms": [-0.0200, -0.169],
+    "crossfade_time": [6, 20],
+    "tolerance": 0.87,
     "regenerate_audio": false,
-    "max_percent_distance": 0.0027,
-    "vowel_volume_scaling_factor": 1.0,
+    "max_percent_distance": 0.0035,
+    "vowel_volume_scaling_factor": 0.8,
     "c1_scale": 0.4,
     "trim_style": "keep_end",
     "c1_path": "./generated_cvc_final/dish_desh_dash_run/low_f0/desh/desh_C1_20250724125823.wav",
@@ -71,8 +74,9 @@
     ],
     "f0f3f4": { "f0": 130, "f3": 2841, "f4": 3568 },
     "vowel_targets": [
+      { "vowel": "AE", "f1": 765.000, "f2": 1624.0, "label": "AE_Optimized" },
+
       { "vowel": "EH", "f1": 556.000, "f2": 1791.000, "label": "EH_PNW" },
-      { "vowel": "AE", "f1": 750.000, "f2": 1610.000, "label": "AE_Optimized" },
       { "vowel": "IH", "f1": 441.000, "f2": 1942.000, "label": "IH_PNW" },
 
 
@@ -86,9 +90,9 @@
     "vowel_length": 0.19,
     "pad_ms": [0.0105, -0.020],
     "crossfade_time": [10, 120],
-    "tolerance": 0.79,
+    "tolerance": 0.87,
     "regenerate_audio": false,
-    "max_percent_distance": 0.0027,
+    "max_percent_distance": 0.0035,
     "vowel_volume_scaling_factor": 1,
     "c1_scale": 0.8,
     "trim_style": "keep_middle",
@@ -103,7 +107,7 @@
     "f0f3f4": { "f0": 145.92, "f3": 2841, "f4": 3568 },
     "vowel_targets": [
       { "vowel": "EH", "f1": 556.000, "f2": 1791.000, "label": "EH_PNW" },
-      { "vowel": "AE", "f1": 750.000, "f2": 1610.000, "label": "AE_Optimized" },
+      { "vowel": "AE", "f1": 765.000, "f2": 1624.0, "label": "AE_Optimized" },
       { "vowel": "IH", "f1": 441.000, "f2": 1942.000, "label": "IH_PNW" },
 
 
@@ -117,9 +121,9 @@
     "vowel_length": 0.19,
     "pad_ms": [0.0105, -0.020],
     "crossfade_time": [10, 120],
-    "tolerance": 0.79,
+    "tolerance": 0.87,
     "regenerate_audio": false,
-    "max_percent_distance": 0.0027,
+    "max_percent_distance": 0.0035,
     "vowel_volume_scaling_factor": 1,
     "c1_scale": 0.8,
     "trim_style": "keep_middle",
@@ -133,9 +137,9 @@
 
       ["D EH SH", "desh"]
     ],
-    "f0f3f4": {"f0":130 , "f3": 2983, "f4": 3518},
+    "f0f3f4": {"f0":130 , "f3": 2841, "f4": 3568},
     "vowel_targets": [
-      { "vowel": "AE", "f1": 750.000, "f2": 1610.000, "label": "AE_Optimized" },
+      { "vowel": "AE", "f1": 765.000, "f2": 1624.0, "label": "AE_Optimized" },
 
       { "vowel": "IH", "f1": 441.000, "f2": 1942.000, "label": "IH_PNW" },
       { "vowel": "EH", "f1": 556.000, "f2": 1791.000, "label": "EH_PNW" },
@@ -150,9 +154,9 @@
     "vowel_length": 0.19,
     "pad_ms": [0.015, 0.00],
     "crossfade_time": [1,40],
-    "tolerance": 0.79,
+    "tolerance": 0.87,
       "regenerate_audio": false,
-    "max_percent_distance": 0.0027,
+    "max_percent_distance": 0.0035,
       "vowel_volume_scaling_factor": 1.5,
       "c1_scale": 1.4,
   "trim_style": "keep_end"
@@ -163,9 +167,9 @@
 
       ["D EH SH", "desh"]
     ],
-    "f0f3f4": {"f0":145.92 , "f3": 2983, "f4": 3518},
+    "f0f3f4": {"f0":145.92 , "f3": 2841, "f4": 3568},
     "vowel_targets": [
-      { "vowel": "AE", "f1": 750.000, "f2": 1610.000, "label": "AE_Optimized" },
+      { "vowel": "AE", "f1": 765.000, "f2": 1624.0, "label": "AE_Optimized" },
 
       { "vowel": "IH", "f1": 441.000, "f2": 1942.000, "label": "IH_PNW" },
       { "vowel": "EH", "f1": 556.000, "f2": 1791.000, "label": "EH_PNW" },
@@ -180,9 +184,9 @@
     "vowel_length": 0.19,
     "pad_ms": [0.015, 0.00],
     "crossfade_time": [1,40],
-    "tolerance": 0.79,
+    "tolerance": 0.87,
       "regenerate_audio": false,
-    "max_percent_distance": 0.0027,
+    "max_percent_distance": 0.0035,
       "vowel_volume_scaling_factor": 1.5,
       "c1_scale": 1.4,
   "trim_style": "keep_end"
