@@ -1,144 +1,226 @@
 [
-{
-  "output_root": "./generated_cvc_final/wig_weg_wag_run/low_f0",
-  "items": [["W AE G", "wag"]],
-  "f0f3f4": { "f0": 130 },
 
-  "vowel_targets": [
     {
-      "vowel": "AE",
-      "label": "AE_Optimized",
-      "f1": 765.0,
-      "f2": 1624.0,
-      "pregenerated_vowel_location": "./generated_cvc_final/gig_geg_gag_run/low_f0/gag/tuned_0/gag_V_20250728133635_wave_0.9624763453048392_1.0581066746754326_0.8099336348729215_1.2874746513496296_0.8388049268479846.wav"
-    },
-    {
-      "vowel": "EH",
-      "label": "EH_PNW",
-      "f1": 556.0,
-      "f2": 1791.0,
-      "pregenerated_vowel_location": "./generated_cvc_final/gig_geg_gag_run/low_f0/gag/tuned_1/gag_V_20250728133635_wave_0.9802608692324895_0.7391182094110773_0.8809080219238348_1.108905341707662_1.0487661646782749.wav"
-    },
-    {
-      "vowel": "IH",
-      "label": "IH_PNW",
-      "f1": 441.0,
-      "f2": 1942.0,
-      "pregenerated_vowel_location": "./generated_cvc_final/gig_geg_gag_run/low_f0/gag/tuned_2/gag_V_20250728133635_wave_0.9792213057899363_0.599154591802359_0.9517639095614869_1.1314940283361263_1.0317409484644202.wav"
-    },
-    {
-      "vowel": "IH",
-      "label": "IH_PB",
-      "f1": 386.462,
-      "f2": 1977.385,
-      "pregenerated_vowel_location": "./generated_cvc_final/gig_geg_gag_run/low_f0/gag/tuned_3/gag_V_20250728133635_wave_0.9789679646335906_0.5229902567685052_0.9571350124353055_1.1333020885556138_1.06421335916556.wav"
-    },
-    {
-      "vowel": "EH",
-      "label": "EH_PB",
-      "f1": 535.143,
-      "f2": 1868.286,
-      "pregenerated_vowel_location": "./generated_cvc_final/gig_geg_gag_run/low_f0/gag/tuned_4/gag_V_20250728133635_wave_0.9796882454056446_0.7238692512651737_0.9162515657211739_1.1036406033524708_1.0343873722134842.wav"
-    },
-    {
-      "vowel": "IH",
-      "label": "IH_AVG",
-      "f1": 413.731,
-      "f2": 1959.692,
-      "pregenerated_vowel_location": "./generated_cvc_final/gig_geg_gag_run/low_f0/gag/tuned_5/gag_V_20250728133635_wave_0.9794789140592174_0.5702726445879399_0.9605402434337541_1.1330802067705055_1.0503253986291072.wav"
-    },
-    {
-      "vowel": "EH",
-      "label": "EH_AVG",
-      "f1": 545.572,
-      "f2": 1829.643,
-      "pregenerated_vowel_location": "./generated_cvc_final/gig_geg_gag_run/low_f0/gag/tuned_6/gag_V_20250728133635_wave_0.9803603879863497_0.7307476923158558_0.9017131077564147_1.1153529112943772_1.0610753955159644.wav"
-    }
-  ],
+    "output_root": "./generated_cvc_final/lidge_ledge_ladge_run/low_f0",
+    "items": [
+      [
+        "L EH JH",
+        "ledge"
+      ]
+    ],
+    "f0f3f4": { "f0": 130},
+    "vowel_targets": [
+            {
+        "vowel": "AE",
+        "f1": 770.000,
+        "f2": 1624.000,
+        "label": "AE_Optimized"
+      },
+      {
+        "vowel": "EH",
+        "f1": 556.000,
+        "f2": 1791.000,
+        "label": "EH_PNW"
+      },
 
-  "targets": ["AE"],
-  "vowel_length": 0.19,
-  "pad_ms": [-0.01, -0.020],
-  "crossfade_time": [60, 90],
-  "tolerance": 3.85,
-  "regenerate_audio": false,
-  "max_percent_distance": 0.0335,
-  "vowel_volume_scaling_factor": 1.0,
-  "c1_scale": 2.0,
-  "voice_id": "ZaZosYpkIGmSqOwAlfnk",
-  "trim_style": "keep_end",
+      {
+        "vowel": "IH",
+        "f1": 441.000,
+        "f2": 1942.000,
+        "label": "IH_PNW"
+      },
+      {
+        "vowel": "IH",
+        "f1": 386.462,
+        "f2": 1977.385,
+        "label": "IH_PB"
+      },
+      {
+        "vowel": "EH",
+        "f1": 535.143,
+        "f2": 1868.286,
+        "label": "EH_PB"
+      },
+      {
+        "vowel": "IH",
+        "f1": 413.731,
+        "f2": 1959.692,
+        "label": "IH_AVG"
+      },
+      {
+        "vowel": "EH",
+        "f1": 545.572,
+        "f2": 1829.643,
+        "label": "EH_AVG"
+      }
+    ],
+    "targets": [
+      "EH"
+    ],
+    "vowel_length": 0.19,
+    "pad_ms": [-0.0205, -0.169],
 
-  "c2_path": "./generated_cvc_final/gig_geg_gag_run/low_f0/gag/gag_C2_20250725135642.wav"
-},
+    "crossfade_time": [
+      6,
+      3
+    ],
+    "tolerance": 0.87,
+    "regenerate_audio": false,
+    "max_percent_distance": 0.0035,
+    "vowel_volume_scaling_factor": 1.8,
+    "c1_scale": 1.0,
+    "trim_style": "keep_end",
 
-{
-  "output_root": "./generated_cvc_final/wig_weg_wag_run/high_f0",
-  "items": [["W AE G", "wag"]],
-  "f0f3f4": { "f0": 145.92, "f3": 2841, "f4": 3568 },
+        "c1_path": "./generated_cvc_final/lip_lep_lap_run/low_f0/lep/lep_C1_20250728152533.wav",
+    "c2_path": "./generated_cvc_final/dedge_run/low_f0/ledge/ledge_C2_good.wav"
+  },
 
-  "vowel_targets": [
-    {
-      "vowel": "AE",
-      "label": "AE_Optimized",
-      "f1": 765.0,
-      "f2": 1624.0,
-      "pregenerated_vowel_location": "./generated_cvc_final/gig_geg_gag_run/high_f0/gag/tuned_0/gag_V_20250728133801_wave_0.9907467922901876_0.9907149839244033_0.7968104585003806_1.1306934497210617_1.183893114937481.wav"
-    },
-    {
-      "vowel": "EH",
-      "label": "EH_PNW",
-      "f1": 556.0,
-      "f2": 1791.0,
-      "pregenerated_vowel_location": "./generated_cvc_final/gig_geg_gag_run/high_f0/gag/tuned_1/gag_V_20250728133801_wave_0.9911180271610052_0.7557731145428707_0.8783642278775924_1.0617193874875122_1.1746119427421968.wav"
-    },
-    {
-      "vowel": "IH",
-      "label": "IH_PNW",
-      "f1": 441.0,
-      "f2": 1942.0,
-      "pregenerated_vowel_location": "./generated_cvc_final/gig_geg_gag_run/high_f0/gag/tuned_2/gag_V_20250728133801_wave_0.9983304228538937_0.5809250511145462_0.9414733599028329_1.1300796820634875_1.1251239554733479.wav"
-    },
-    {
-      "vowel": "IH",
-      "label": "IH_PB",
-      "f1": 386.462,
-      "f2": 1977.385,
-      "pregenerated_vowel_location": "./generated_cvc_final/gig_geg_gag_run/high_f0/gag/tuned_3/gag_V_20250728133801_wave_0.9977569949934149_0.515466272208104_0.9418239843478122_1.1768667943769666_1.123340480319481.wav"
-    },
-    {
-      "vowel": "EH",
-      "label": "EH_PB",
-      "f1": 535.143,
-      "f2": 1868.286,
-      "pregenerated_vowel_location": "./generated_cvc_final/gig_geg_gag_run/high_f0/gag/tuned_4/gag_V_20250728133801_wave_0.991919807772838_0.7514658930538974_0.9181567165928558_1.0358719459767969_1.1725118734081295.wav"
-    },
-    {
-      "vowel": "IH",
-      "label": "IH_AVG",
-      "f1": 413.731,
-      "f2": 1959.692,
-      "pregenerated_vowel_location": "./generated_cvc_final/gig_geg_gag_run/high_f0/gag/tuned_5/gag_V_20250728133801_wave_0.9963657309711692_0.529758761393969_0.9410163416208145_1.1727888996751736_1.1225423401025727.wav"
-    },
-    {
-      "vowel": "EH",
-      "label": "EH_AVG",
-      "f1": 545.572,
-      "f2": 1829.643,
-      "pregenerated_vowel_location": "./generated_cvc_final/gig_geg_gag_run/high_f0/gag/tuned_6/gag_V_20250728133801_wave_0.9918097474757083_0.7608797476436634_0.9020362825469412_1.0489043400433729_1.1841265447799763.wav"
-    }
-  ],
+  {
+    "output_root": "./generated_cvc_final/lip_lep_lap_run/low_f0",
+    "items": [
+      [
+        "L EH P",
+        "lep"
+      ]
+    ],
+    "f0f3f4": { "f0": 130},
+    "vowel_targets": [
+            {
+        "vowel": "AE",
+        "f1": 770.000,
+        "f2": 1624.000,
+        "label": "AE_Optimized"
+      },
+      {
+        "vowel": "EH",
+        "f1": 556.000,
+        "f2": 1791.000,
+        "label": "EH_PNW"
+      },
 
-  "targets": ["AE"],
-  "vowel_length": 0.19,
-  "pad_ms": [-0.02, -0.020],
-  "crossfade_time": [30, 90],
-  "tolerance": 3.85,
-  "regenerate_audio": false,
-  "max_percent_distance": 0.0335,
-  "vowel_volume_scaling_factor": 1.0,
-  "c1_scale": 1.1,
-  "voice_id": "ZaZosYpkIGmSqOwAlfnk",
-  "trim_style": "keep_end",
-  "c2_path": "./generated_cvc_final/gig_geg_gag_run/low_f0/gag/gag_C2_20250725135642.wav"
-}
+      {
+        "vowel": "IH",
+        "f1": 441.000,
+        "f2": 1942.000,
+        "label": "IH_PNW"
+      },
+      {
+        "vowel": "IH",
+        "f1": 386.462,
+        "f2": 1977.385,
+        "label": "IH_PB"
+      },
+      {
+        "vowel": "EH",
+        "f1": 535.143,
+        "f2": 1868.286,
+        "label": "EH_PB"
+      },
+      {
+        "vowel": "IH",
+        "f1": 413.731,
+        "f2": 1959.692,
+        "label": "IH_AVG"
+      },
+      {
+        "vowel": "EH",
+        "f1": 545.572,
+        "f2": 1829.643,
+        "label": "EH_AVG"
+      }
+    ],
+    "targets": [
+      "EH"
+    ],
+    "vowel_length": 0.19,
+    "pad_ms": [
+      -0.002,
+      -0.051
+    ],
+    "crossfade_time": [
+      5,
+      2
+    ],
+    "tolerance": 0.87,
+    "regenerate_audio": false,
+    "max_percent_distance": 0.0035,
+    "vowel_volume_scaling_factor": 1.0,
+    "c1_scale": 1.0,
+    "trim_style": "keep_end"
+  },
+
+    {
+    "output_root": "./generated_cvc_final/lith_leth_lath_run/low_f0",
+    "items": [
+      [
+        "L AE TH",
+        "lath"
+      ]
+    ],
+    "f0f3f4": { "f0": 130},
+    "vowel_targets": [
+            {
+        "vowel": "AE",
+        "f1": 768.000,
+        "f2": 1624.000,
+        "label": "AE_Optimized"
+      },
+      {
+        "vowel": "EH",
+        "f1": 556.000,
+        "f2": 1791.000,
+        "label": "EH_PNW"
+      },
+
+      {
+        "vowel": "IH",
+        "f1": 441.000,
+        "f2": 1942.000,
+        "label": "IH_PNW"
+      },
+      {
+        "vowel": "IH",
+        "f1": 386.462,
+        "f2": 1977.385,
+        "label": "IH_PB"
+      },
+      {
+        "vowel": "EH",
+        "f1": 535.143,
+        "f2": 1868.286,
+        "label": "EH_PB"
+      },
+      {
+        "vowel": "IH",
+        "f1": 413.731,
+        "f2": 1959.692,
+        "label": "IH_AVG"
+      },
+      {
+        "vowel": "EH",
+        "f1": 545.572,
+        "f2": 1829.643,
+        "label": "EH_AVG"
+      }
+    ],
+    "targets": [
+      "AE"
+    ],
+    "vowel_length": 0.19,
+    "pad_ms": [0.03, -0.08],
+
+    "crossfade_time": [
+      8,
+      5
+    ],
+    "tolerance": 0.87,
+    "regenerate_audio": false,
+    "max_percent_distance": 0.0035,
+    "vowel_volume_scaling_factor": 3.6,
+    "c1_scale": 1.8,
+    "trim_style": "keep_end",
+
+        "c1_path": "./generated_cvc_final/lip_lep_lap_run/low_f0/lep/lep_C1_20250728152533.wav",
+    "c2_path": "./generated_cvc_final/gith_geth_gath_run/low_f0/gath/gath_C2_20250728134947.wav"
+  }
 ]

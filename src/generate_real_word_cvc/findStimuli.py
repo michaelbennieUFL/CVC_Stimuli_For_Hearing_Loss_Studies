@@ -39,10 +39,10 @@ def get_lemma_spacy(word: str) -> str:
 
 
 # --- Load COCA Spoken Relative Frequencies --------------------------
-N_SPOKEN = 573_516_412
+N_SPOKEN = 396_082_618+59_882
 FREQ_FLOOR = 1 / N_SPOKEN  # ≈ 1.221e-8
 
-def load_spoken_freq_table(path: str = "./wordlist/coca_spoken_counts.tsv") -> dict:
+def load_spoken_freq_table(path: str = "./wordlist/coca_spoken_rank.tsv") -> dict:
     freq = {}
     with open(path, newline="", encoding="utf-8") as fh:
         reader = csv.DictReader(fh, delimiter="\t")
@@ -250,13 +250,13 @@ def summarize_c1vc2_input_output_cases(
         middle_mean_freq = sum(inner_freqs) / len(inner_freqs) if inner_freqs else 0.0
 
         original_length=len(Outer_Category_)
-        if outer_left_freq<1.8 and original_length>= 1 :
+        if outer_left_freq<1.0 and original_length>= 1 :
             have.discard(Outer_Category_[0])
             outer_Category_Words[0] = ""
-        if outer_right_freq<1.8 and original_length>= 2 :
+        if outer_right_freq<1.0 and original_length>= 2 :
             have.discard(Outer_Category_[1])
             outer_Category_Words[1]=""
-        if middle_mean_freq<1.8:
+        if middle_mean_freq<1.0:
             have.difference_update(Inner_Category_)
             inner_words=[]
 

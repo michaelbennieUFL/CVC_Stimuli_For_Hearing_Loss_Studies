@@ -7,7 +7,7 @@
     ],
     "f0f3f4": { "f0": 145.92, "f3": 2841, "f4": 3568 },
     "vowel_targets": [
-            { "vowel": "AE", "f1": 765.000, "f2": 1624.0, "label": "AE_Optimized" },
+            { "vowel": "AE", "f1": 770.000, "f2": 1624.0, "label": "AE_Optimized" },
 
       { "vowel": "EH", "f1": 556.000, "f2": 1791.000, "label": "EH_PNW" },
       { "vowel": "IH", "f1": 441.000, "f2": 1942.000, "label": "IH_PNW" },
@@ -42,7 +42,7 @@
     "f0f3f4": { "f0": 130, "f3": 2841, "f4": 3568 },
     "vowel_targets": [
       { "vowel": "EH", "f1": 556.000, "f2": 1791.000, "label": "EH_PNW" },
-      { "vowel": "AE", "f1": 765.000, "f2": 1624.0, "label": "AE_Optimized" },
+      { "vowel": "AE", "f1": 770.000, "f2": 1624.0, "label": "AE_Optimized" },
       { "vowel": "IH", "f1": 441.000, "f2": 1942.000, "label": "IH_PNW" },
 
 
@@ -74,7 +74,7 @@
     ],
     "f0f3f4": { "f0": 130, "f3": 2841, "f4": 3568 },
     "vowel_targets": [
-      { "vowel": "AE", "f1": 765.000, "f2": 1624.0, "label": "AE_Optimized" },
+      { "vowel": "AE", "f1": 770.000, "f2": 1624.0, "label": "AE_Optimized" },
 
       { "vowel": "EH", "f1": 556.000, "f2": 1791.000, "label": "EH_PNW" },
       { "vowel": "IH", "f1": 441.000, "f2": 1942.000, "label": "IH_PNW" },
@@ -107,7 +107,7 @@
     "f0f3f4": { "f0": 145.92, "f3": 2841, "f4": 3568 },
     "vowel_targets": [
       { "vowel": "EH", "f1": 556.000, "f2": 1791.000, "label": "EH_PNW" },
-      { "vowel": "AE", "f1": 765.000, "f2": 1624.0, "label": "AE_Optimized" },
+      { "vowel": "AE", "f1": 770.000, "f2": 1624.0, "label": "AE_Optimized" },
       { "vowel": "IH", "f1": 441.000, "f2": 1942.000, "label": "IH_PNW" },
 
 
@@ -139,7 +139,7 @@
     ],
     "f0f3f4": {"f0":130 , "f3": 2841, "f4": 3568},
     "vowel_targets": [
-      { "vowel": "AE", "f1": 765.000, "f2": 1624.0, "label": "AE_Optimized" },
+      { "vowel": "AE", "f1": 770.000, "f2": 1624.0, "label": "AE_Optimized" },
 
       { "vowel": "IH", "f1": 441.000, "f2": 1942.000, "label": "IH_PNW" },
       { "vowel": "EH", "f1": 556.000, "f2": 1791.000, "label": "EH_PNW" },
@@ -169,7 +169,7 @@
     ],
     "f0f3f4": {"f0":145.92 , "f3": 2841, "f4": 3568},
     "vowel_targets": [
-      { "vowel": "AE", "f1": 765.000, "f2": 1624.0, "label": "AE_Optimized" },
+      { "vowel": "AE", "f1": 770.000, "f2": 1624.0, "label": "AE_Optimized" },
 
       { "vowel": "IH", "f1": 441.000, "f2": 1942.000, "label": "IH_PNW" },
       { "vowel": "EH", "f1": 556.000, "f2": 1791.000, "label": "EH_PNW" },

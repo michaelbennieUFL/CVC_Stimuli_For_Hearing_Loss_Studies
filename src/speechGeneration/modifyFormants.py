@@ -211,7 +211,7 @@ def match_loudness(reference_wav: Path, target_wav: Path):
 
 
 
-def compute_trimmed_f0(f0_values, lower=15, upper=85, max_f0=250):
+def compute_trimmed_f0(f0_values, lower=20, upper=90, max_f0=280):
     """
     Computes mean F0 within a specified percentile range,
     ignoring F0 values above `max_f0`. If trimmed result is empty,
@@ -242,7 +242,7 @@ def compute_trimmed_f0(f0_values, lower=15, upper=85, max_f0=250):
 
 
 
-def mean_middle_percent(values: np.ndarray, middle_percent: float = 0.40) -> float:
+def mean_middle_percent(values: np.ndarray, middle_percent: float = 0.80) -> float:
     """
     Compute the mean of the middle `middle_percent` values by index.
     Does not sort by value – just trims based on position.
@@ -264,8 +264,8 @@ def mean_middle_percent(values: np.ndarray, middle_percent: float = 0.40) -> flo
 
 def analyse_formants(
     wav_path: str | Path,
-    f0_min: int = 60,
-    f0_max: int = 250,
+    f0_min: int = 50,
+    f0_max: int = 280,
     max_formant: int = 5_500,
 ) -> np.ndarray:
     sound = parselmouth.Sound(str(wav_path))

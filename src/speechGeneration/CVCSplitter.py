@@ -17,63 +17,67 @@ from praatio import textgrid as _tg_mod
 import soundfile as sf
 import numpy as np
 from datetime import datetime
-
+import tempfile, uuid
 CROSSFADE_TIME=3
+
 # --------------------------------------------------------------------
 # 1. generate_textgrid  (unchanged)
 # --------------------------------------------------------------------
 # ---------- only the body of generate_textgrid() changed --------------
 import os, tempfile, shutil   # add at top of file
 
-def generate_textgrid(
-    wav_path: str | Path,
-    transcript: str | Path | None = None,
-    *,
-    dictionary: str = "english_us_arpa",
-    acoustic_model: str = "english_mfa",
-    tg_format: str = "short_textgrid",
-    overwrite: bool = False,
+
+# ---------- NEW helper -------------------------------------------------
+def batch_align(
+        wav_paths: list[Path],
+        transcripts: list[str],
+        *,
+        dictionary="english_us_arpa",
+        acoustic_model="english_us_arpa",
+        num_jobs: int = 8
 ) -> Path:
-    wav_path = Path(wav_path).expanduser().resolve()
-    tg_path  = wav_path.with_suffix(".TextGrid")
-    if tg_path.exists() and not overwrite:
-        return tg_path
+    """Run *one* MFA call over all wav/text pairs and return the dir with TextGrids."""
+    corpus_dir   = Path(tempfile.mkdtemp(prefix="mfa_corpus_"))
+    output_dir   = Path(tempfile.mkdtemp(prefix="mfa_out_"))
+    for wav, txt in zip(wav_paths, transcripts):
+        shutil.copy2(wav, corpus_dir / wav.name)
+        (corpus_dir / wav.with_suffix(".lab").name).write_text(txt)
 
-    # 1) Pick or create a text-file that contains the transcript -------------
-    tmp_file: Path | None = None
-    if transcript is None:                       # look for sibling *.lab
-        lab = wav_path.with_suffix(".lab")
-        if not lab.exists():
-            raise ValueError("No transcript string/path and no *.lab file")
-        transcript_path = lab
+    subprocess.run(
+        ["mfa", "align", str(corpus_dir), dictionary, acoustic_model,
+         str(output_dir), "--clean", "--output_format", "short_textgrid",
+         "--num_jobs", str(num_jobs)],
+        check=True,
+    )
+    return output_dir
 
-    else:
-        transcript_path = Path(transcript).expanduser()
-        if not transcript_path.exists():         # you've passed raw text
-            tmp = tempfile.NamedTemporaryFile(
-                mode="w", suffix=".txt", delete=False, dir=wav_path.parent
-            )
-            tmp.write(str(transcript_path))      # transcript_path holds the text
-            tmp.close()
-            tmp_file = Path(tmp.name)
-            transcript_path = tmp_file           # now it *is* a path
 
-    # 2) Call MFA ------------------------------------------------------------
+
+
+def generate_textgrid(wav_path, transcript=None, **kwargs):
+    wav_path = Path(wav_path).resolve()
+
+    # Use unique tmp folder per call
+    mfa_tmp = Path(tempfile.mkdtemp(prefix="mfa_call_", dir="/tmp"))
+    tg_path = mfa_tmp / f"{uuid.uuid4().hex}.TextGrid"
+
+    transcript_path = Path(transcript)
+    if not transcript_path.exists():
+        tmp_txt = mfa_tmp / f"{uuid.uuid4().hex}.lab"
+        tmp_txt.write_text(str(transcript))
+        transcript_path = tmp_txt
+
     cmd = [
         "mfa", "align_one",
         str(wav_path),
-        str(transcript_path),        # <-- always a real file now
-        dictionary,
-        acoustic_model,
-        str(tg_path),                # positional OUTPUT_PATH
-        "--output_format", tg_format,
+        str(transcript_path),
+        kwargs.get("dictionary", "english_us_arpa"),
+        kwargs.get("acoustic_model", "english_us_arpa"),
+        str(tg_path),
+        "--output_format", kwargs.get("tg_format", "short_textgrid"),
         "--clean",
     ]
     subprocess.run(cmd, check=True)
-
-    # 3) Clean up the temporary file (if we made one) ------------------------
-    if tmp_file is not None and tmp_file.exists():
-        tmp_file.unlink()
 
     return tg_path
 
@@ -121,13 +125,12 @@ def segment_vowels(
 # --------------------------------------------------------------------
 # 3. wrapper – align *and* segment
 # --------------------------------------------------------------------
-def get_vowel_segments(
-    wav_path: str | Path,
-    vowels: Iterable[str],
-    **align_kwargs,
-) -> Dict[str, List[Tuple[float, float]]]:
-    generate_textgrid(wav_path, **align_kwargs)
-    return segment_vowels(wav_path, vowels)
+def get_vowel_segments(wav_path: str | Path,
+                        vowels: Iterable[str],
+                       **align_kwargs) -> Dict[str, List[Tuple[float, float]]]:
+    tg_path = generate_textgrid(wav_path, **align_kwargs)
+    return segment_vowels(wav_path, vowels, tg_path=tg_path)
+
 
 
 
@@ -247,18 +250,24 @@ def add_audio_buffer_with_noise(input_file: str, output_file: str, buffer_durati
     sf.write(output_file, y_buffered, sr)
 
 
-def generate_splitAudio(wav_path="../../input_data/En-us-bag.wav",transcript="bag",out_dir="../../output_files/temp",
-        dictionary="english_us_arpa",
-        acoustic_model="english_us_arpa",
-        pad_ms: float | Tuple[float, float] = [0.012,-0.007],):
+import tempfile, uuid
 
 
-    if isinstance(pad_ms, (int, float)):
-        pad_c1, pad_c2 = pad_ms, pad_ms
-    else:
-        pad_c1, pad_c2 = pad_ms            # (ms to add to C1 end, ms to add to C2 start)
-    pad_c1 = -abs(pad_c1) if math.isinf(pad_c1) else pad_c1
-    pad_c2 = abs(pad_c2) if math.isinf(pad_c2) else pad_c2
+def generate_splitAudio(wav_path, transcript="bag", out_dir=None,
+                        dictionary="english_us_arpa",
+                        acoustic_model="english_us_arpa",
+                        pad_ms: float | Tuple[float, float] = (0.012, -0.007),
+                        noise_buffer_duration: float = 0.15):
+    # Create unique temp dir for MFA to avoid collisions
+    worker_tmp = Path(tempfile.mkdtemp(prefix="mfa_worker_", dir="/tmp"))
+
+    # Ensure out_dir exists
+    out_dir = Path(out_dir or worker_tmp).resolve()
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    # Give MFA a unique transcript file
+    transcript_file = worker_tmp / f"{uuid.uuid4().hex}.lab"
+    transcript_file.write_text(transcript)
 
     VOWELS = [
         "AA", "AE", "AH", "AO", "AW", "AY",
@@ -267,30 +276,34 @@ def generate_splitAudio(wav_path="../../input_data/En-us-bag.wav",transcript="ba
         "OW", "OY",
         "UH", "UW",
     ]
+
     spans = get_vowel_segments(
         wav_path,
         vowels=VOWELS,
-        transcript=transcript,
-        dictionary="english_us_arpa",
-        acoustic_model="english_us_arpa",
+        transcript=transcript_file,
+        dictionary=dictionary,
+        acoustic_model=acoustic_model,
     )
 
-    actualSpan=generate_convex_segment_set(spans)
+    actualSpan = generate_convex_segment_set(spans)
 
     print(spans)
     print(actualSpan)
 
-    actualSpan[0]+=pad_c1
-    actualSpan[1]+=pad_c2
+    if isinstance(pad_ms, (int, float)):
+        pad_c1, pad_c2 = pad_ms, pad_ms
+    else:
+        pad_c1, pad_c2 = pad_ms
+    actualSpan[0] += pad_c1
+    actualSpan[1] += pad_c2
 
     c1, v, c2 = split_cvc_audio(
         wav_path,
         actualSpan,
         out_dir=out_dir,
-        prefix=transcript,
+        prefix=Path(wav_path).stem,
+        noise_buffer_duration=noise_buffer_duration
     )
-
-
 
     return c1, v, c2
 

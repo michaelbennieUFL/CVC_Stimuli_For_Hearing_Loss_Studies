@@ -50,6 +50,8 @@ class PhonemeTTSEngine:
         api_key: str,
         voice_id: str,
         model_id: str = "eleven_turbo_v2",
+            stability=1.0,
+            speed=0.7,
     ) -> None:
         self.client = ElevenLabs(api_key=api_key)
         self.voice_id = voice_id
@@ -61,15 +63,15 @@ class PhonemeTTSEngine:
 
             request=VoiceSettings(
 
-                stability=1.0,
+                stability=stability,
 
-                use_speaker_boost=False,
+                use_speaker_boost=True,
 
                 similarity_boost=0.0,
 
                 style=0.0,
 
-                speed=0.7,
+                speed=speed,
 
             ),
 

@@ -12,7 +12,7 @@
     "vowel_targets": [
             {
         "vowel": "AE",
-        "f1": 765.000,
+        "f1": 770.000,
         "f2": 1624.000,
         "label": "AE_Optimized"
       },
@@ -90,7 +90,7 @@
     "vowel_targets": [
             {
         "vowel": "AE",
-        "f1": 765.000,
+        "f1": 770.000,
         "f2": 1624.000,
         "label": "AE_Optimized"
       },
@@ -166,7 +166,7 @@
     "vowel_targets": [
             {
         "vowel": "AE",
-        "f1": 765.000,
+        "f1": 770.000,
         "f2": 1624.000,
         "label": "AE_Optimized"
       },
@@ -241,7 +241,7 @@
     "vowel_targets": [
             {
         "vowel": "AE",
-        "f1": 765.000,
+        "f1": 770.000,
         "f2": 1624.000,
         "label": "AE_Optimized"
       },
@@ -317,7 +317,7 @@
     "vowel_targets": [
             {
         "vowel": "AE",
-        "f1": 765.000,
+        "f1": 770.000,
         "f2": 1624.000,
         "label": "AE_Optimized"
       },
@@ -392,7 +392,7 @@
     "vowel_targets": [
             {
         "vowel": "AE",
-        "f1": 765.000,
+        "f1": 770.000,
         "f2": 1624.000,
         "label": "AE_Optimized"
       },
