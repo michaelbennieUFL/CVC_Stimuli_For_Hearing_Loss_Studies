@@ -211,7 +211,7 @@ def match_loudness(reference_wav: Path, target_wav: Path):
 
 
 
-def compute_trimmed_f0(f0_values, lower=20, upper=90, max_f0=280):
+def compute_trimmed_f0(f0_values, lower=10, upper=90, max_f0=280):
     """
     Computes mean F0 within a specified percentile range,
     ignoring F0 values above `max_f0`. If trimmed result is empty,
@@ -281,9 +281,16 @@ def analyse_formants(
                 f_tracks[ch].append(val)
 
     # Compute F0 values
-    pitch = praat.call(sound, "To Pitch", 0.001, f0_min, f0_max)
+    sound = parselmouth.Sound(str(wav_path))
+    # Use the same settings as the GUI:
+    pitch = sound.to_pitch(
+        time_step=0.01,  # 10 ms frame step (matches GUI)
+        pitch_floor=100,  # raise floor to suppress halving
+        pitch_ceiling=300  # match GUI
+    )
     f0_values = pitch.selected_array["frequency"]
-    f0_values = f0_values[f0_values > 0]  # Remove unvoiced
+    f0_values = f0_values[f0_values > 0]
+
     # Compute trimmed mean F0
     mean_f0 = compute_trimmed_f0(f0_values)
     if mean_f0 is None:

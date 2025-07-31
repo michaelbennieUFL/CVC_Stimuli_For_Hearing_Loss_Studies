@@ -1,194 +1,406 @@
 [
+{
+  "output_root": "./generated_cvc_final/did_ded_dad_run/high_f0",
+
+  "items": [
+    ["D AE D", "dad"]
+  ],
+
+
+    "c1_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/SH/cut/desh_base_beginning.wav",
+    "vowel_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/D/cut/dad_base_middle_buffered.wav",
+    "c2_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/D/cut/dad_base_end.wav",
+
+    "reference_vowel_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/D/cut/dad_base_middle.wav",
+
+  "f0f3f4": { "f0": 145.92, "f3": 2800, "f4": 4000},
+
+    "vowel_targets": [
+      {
+        "vowel": "AE",
+        "label": "AE_Optimized",
+        "f1": 754.70,
+        "f2": 1638.8,
+        "pregenerated_vowel_location": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/D/cut/dad_base_middle_buffered.wav"
+      },
+      {
+        "vowel": "EH",
+        "label": "EH_Optimized",
+        "f1": 589.5,
+        "f2": 1801.1,
+        "pregenerated_vowel_location": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/D/cut/dad_base_middle_buffered.wav"
+      },
+      {
+        "vowel": "IH",
+        "label": "IH_Optimized",
+        "f1": 433.2,
+        "f2": 1962.9,
+        "pregenerated_vowel_location": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/D/cut/dad_base_middle_buffered.wav"
+      }
+    ],
+  "targets": ["AE"],
+  "vowel_length": 0.19,
+  "pad_ms": [0.015, 0.0],
+  "crossfade_time": [1, 30],
+  "tolerance": 0.59,
+  "max_percent_distance": 0.0035,
+  "vowel_volume_scaling_factor": 1.0,
+  "c1_scale": 1.1,
+  "trim_style": "keep_end",
+  "regenerate_audio": false,
+    "force_optimize": true
+},
+{
+    "output_root": "./generated_cvc_final/did_ded_dad_run/low_f0",
+
+  "items": [
+    ["D AE D", "dad"]
+  ],
+
+
+    "c1_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/SH/cut/desh_base_beginning.wav",
+    "vowel_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/D/cut/dad_base_middle_buffered.wav",
+    "c2_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/D/cut/ded_base_end.wav",
+
+    "reference_vowel_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/D/cut/ded_base_middle.wav",
+
+  "f0f3f4": { "f0": 130, "f3": 2800, "f4": 4000},
+
+    "vowel_targets": [
+      {
+        "vowel": "AE",
+        "label": "AE_Optimized",
+        "f1": 754.70,
+        "f2": 1638.8,
+        "pregenerated_vowel_location": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/D/cut/dad_base_middle_buffered.wav"
+      },
+      {
+        "vowel": "EH",
+        "label": "EH_Optimized",
+        "f1": 589.5,
+        "f2": 1801.1,
+        "pregenerated_vowel_location": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/D/cut/dad_base_middle_buffered.wav"
+      },
+      {
+        "vowel": "IH",
+        "label": "IH_Optimized",
+        "f1": 433.2,
+        "f2": 1962.9,
+        "pregenerated_vowel_location": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/D/cut/dad_base_middle_buffered.wav"
+      }
+    ],
+  "targets": ["AE"],
+  "vowel_length": 0.19,
+  "pad_ms": [0.015, 0.0],
+  "crossfade_time": [1, 30],
+  "tolerance": 0.57,
+  "max_percent_distance": 0.0031,
+  "vowel_volume_scaling_factor": 1.0,
+  "c1_scale": 1.1,
+  "trim_style": "keep_end",
+  "regenerate_audio": false,
+    "force_optimize": true
+},
+{
+  "output_root": "./generated_cvc_final/dish_desh_dash_run/low_f0",
+
+
+  "items": [
+    ["D AE SH", "dash"]
+  ],
+
+
+  "c1_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/SH/cut/desh_base_beginning.wav",
+  "vowel_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/SH/cut/dash_base_middle_buffered.wav",
+  "c2_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/SH/cut/desh_base_end.wav",
+
+
+  "reference_vowel_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/SH/cut/dish_base_middle.wav",
+
+  "f0f3f4": { "f0": 145.92, "f3": 2800, "f4": 4000},
+
+  "vowel_targets": [
+    {
+      "vowel": "AE",
+      "label": "AE_Optimized",
+      "f1": 754.70, "f2": 1638.8,
+      "pregenerated_vowel_location": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/F/cut/daf_base_middle_buffered.wav"
+    },
+    {
+      "vowel": "EH",
+      "label": "EH_Optimized",
+      "f1": 589.5, "f2": 1801.1,
+      "pregenerated_vowel_location": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/F/cut/daf_base_middle_buffered.wav"
+    },
+    {
+      "vowel": "IH",
+      "label": "IH_Optimized",
+      "f1": 433.2, "f2": 1962.9,
+      "pregenerated_vowel_location": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/F/cut/def_base_middle_buffered.wav"
+    }
+  ],
+  "targets": ["AE"],
+  "vowel_length": 0.19,
+  "pad_ms": [0.015, 0.0],
+  "crossfade_time": [1, 8],
+  "tolerance": 0.47,
+  "max_percent_distance": 0.0021,
+  "vowel_volume_scaling_factor": 1.0,
+  "c1_scale": 1.1,
+  "trim_style": "keep_end",
+  "regenerate_audio": false,
+    "force_optimize": true
+},
+{
+  "output_root": "./generated_cvc_final/dish_desh_dash_run/high_f0",
+
+  "items": [
+    ["D AE SH", "dash"]
+  ],
+
+
+  "c1_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/SH/cut/desh_base_beginning.wav",
+  "vowel_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/SH/cut/dash_base_middle_buffered.wav",
+  "c2_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/SH/cut/desh_base_end.wav",
+
+
+  "reference_vowel_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/SH/cut/dish_base_middle.wav",
+
+  "f0f3f4": { "f0": 145.92, "f3": 2800, "f4": 4000},
+
+  "vowel_targets": [
+    {
+      "vowel": "AE",
+      "label": "AE_Optimized",
+      "f1": 754.70, "f2": 1638.8,
+      "pregenerated_vowel_location": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/F/cut/daf_base_middle_buffered.wav"
+    },
+    {
+      "vowel": "EH",
+      "label": "EH_Optimized",
+      "f1": 589.5, "f2": 1801.1,
+      "pregenerated_vowel_location": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/F/cut/daf_base_middle_buffered.wav"
+    },
+    {
+      "vowel": "IH",
+      "label": "IH_Optimized",
+      "f1": 433.2, "f2": 1962.9,
+      "pregenerated_vowel_location": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/F/cut/def_base_middle_buffered.wav"
+    }
+  ],
+  "targets": ["AE"],
+  "vowel_length": 0.19,
+  "pad_ms": [0.015, 0.0],
+  "crossfade_time": [1, 8],
+  "tolerance": 0.47,
+  "max_percent_distance": 0.0021,
+  "vowel_volume_scaling_factor": 1.0,
+  "c1_scale": 1.1,
+  "trim_style": "keep_end",
+  "regenerate_audio": false,
+    "force_optimize": true
+},
+
+{
+  "output_root": "./generated_cvc_final/dif_def_daf_run/low_f0",
+
+  "items": [
+    ["D AE F", "dash"]
+  ],
+
+  "c1_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/SH/cut/desh_base_beginning.wav",
+  "vowel_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/F/cut/def_base_middle_buffered.wav",
+  "c2_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/F/cut/daf_base_end.wav",
+
+
+  "reference_vowel_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/F/cut/daf_base_middle.wav",
+
+  "f0f3f4": { "f0": 145.92, "f3": 2800, "f4": 4000},
+
+  "vowel_targets": [
+    {
+      "vowel": "AE",
+      "label": "AE_Optimized",
+      "f1": 754.70, "f2": 1638.8,
+      "pregenerated_vowel_location": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/F/cut/daf_base_middle_buffered.wav"
+    },
+    {
+      "vowel": "EH",
+      "label": "EH_Optimized",
+      "f1": 589.5, "f2": 1801.1,
+      "pregenerated_vowel_location": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/F/cut/daf_base_middle_buffered.wav"
+    },
+    {
+      "vowel": "IH",
+      "label": "IH_Optimized",
+      "f1": 433.2, "f2": 1962.9,
+      "pregenerated_vowel_location": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/F/cut/def_base_middle_buffered.wav"
+    }
+  ],
+
+  "targets": ["AE"],
+  "vowel_length": 0.19,
+  "pad_ms": [0.015, 0.0],
+  "crossfade_time": [2, 10],
+  "tolerance": 0.87,
+  "max_percent_distance": 0.0038,
+  "vowel_volume_scaling_factor": 1.0,
+  "c1_scale": 1.0,
+  "trim_style": "keep_end",
+  "regenerate_audio": false,
+    "force_optimize": true
+},    {
+  "output_root": "./generated_cvc_final/dif_def_daf_run/high_f0",
+
+  "items": [
+    ["D AE F", "dash"]
+  ],
+
+
+  "c1_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/SH/cut/desh_base_beginning.wav",
+  "vowel_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/F/cut/def_base_middle_buffered.wav",
+  "c2_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/F/cut/daf_base_end.wav",
+
+
+  "reference_vowel_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/F/cut/daf_base_middle.wav",
+
+  "f0f3f4": { "f0": 145.92, "f3": 2800, "f4": 4000},
+
+  "vowel_targets": [
+    {
+      "vowel": "AE",
+      "label": "AE_Optimized",
+      "f1": 754.70, "f2": 1638.8,
+      "pregenerated_vowel_location": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/F/cut/daf_base_middle_buffered.wav"
+    },
+    {
+      "vowel": "EH",
+      "label": "EH_Optimized",
+      "f1": 589.5, "f2": 1801.1,
+      "pregenerated_vowel_location": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/F/cut/daf_base_middle_buffered.wav"
+    },
+    {
+      "vowel": "IH",
+      "label": "IH_Optimized",
+      "f1": 433.2, "f2": 1962.9,
+      "pregenerated_vowel_location": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/F/cut/def_base_middle_buffered.wav"
+    }
+  ],
+  "targets": ["AE"],
+  "vowel_length": 0.19,
+  "pad_ms": [0.015, 0.0],
+  "crossfade_time": [2, 5],
+  "tolerance": 0.87,
+  "max_percent_distance": 0.0038,
+  "vowel_volume_scaling_factor": 1.0,
+  "c1_scale": 1.0,
+  "trim_style": "keep_end",
+  "regenerate_audio": false,
+    "force_optimize": true
+},
 
     {
-    "output_root": "./generated_cvc_final/dedge_run/high_f0",
-    "items": [
-      ["L EH JH", "ledge"]
-    ],
-    "f0f3f4": { "f0": 145.92, "f3": 2841, "f4": 3568 },
+  "output_root": "./generated_cvc_final/dijh_dejh_dajh_run/low_f0",
+
+  "items": [
+    ["D AE JH", "dajh"]
+  ],
+
+
+    "c1_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/SH/cut/desh_base_beginning.wav",
+    "vowel_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/JH/cut/dajh_base_middle_buffered.wav",
+    "c2_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/JH/cut/dijh_base_end.wav",
+
+    "reference_vowel_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/JH/cut/dijh_base_middle.wav",
+
+  "f0f3f4": { "f0": 130, "f3": 2800, "f4": 4000},
+
     "vowel_targets": [
-            { "vowel": "AE", "f1": 770.000, "f2": 1624.0, "label": "AE_Optimized" },
 
-      { "vowel": "EH", "f1": 556.000, "f2": 1791.000, "label": "EH_PNW" },
-      { "vowel": "IH", "f1": 441.000, "f2": 1942.000, "label": "IH_PNW" },
-
-
-      { "vowel": "IH", "f1": 386.462, "f2": 1977.385, "label": "IH_PB" },
-      { "vowel": "EH", "f1": 535.143, "f2": 1868.286, "label": "EH_PB" },
-
-      { "vowel": "IH", "f1": 413.731, "f2": 1959.692, "label": "IH_AVG" },
-      { "vowel": "EH", "f1": 545.572, "f2": 1829.643, "label": "EH_AVG" }
+      {
+        "vowel": "IH",
+        "label": "IH_Optimized",
+        "f1": 433.2,
+        "f2": 1962.9,
+        "pregenerated_vowel_location": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/JH/cut/dajh_base_middle_buffered.wav"
+      },
+      {
+        "vowel": "AE",
+        "label": "AE_Optimized",
+        "f1": 754.70,
+        "f2": 1638.8,
+        "pregenerated_vowel_location": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/JH/cut/dajh_base_middle_buffered.wav"
+      },
+      {
+        "vowel": "EH",
+        "label": "EH_Optimized",
+        "f1": 589.5,
+        "f2": 1801.1,
+        "pregenerated_vowel_location": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/JH/cut/dajh_base_middle_buffered.wav"
+      }
     ],
-    "targets": ["EH"],
-    "vowel_length": 0.19,
-    "pad_ms": [-0.0200, -0.169],
-    "crossfade_time": [6, 20],
-    "tolerance": 0.87,
-    "regenerate_audio": false,
-    "max_percent_distance": 0.0035,
-    "vowel_volume_scaling_factor": 0.8,
-    "c1_scale": 0.4,
-    "trim_style": "keep_end",
-    "c1_path": "./generated_cvc_final/dish_desh_dash_run/low_f0/desh/desh_C1_20250724125823.wav",
-    "c2_path": "./generated_cvc_final/dedge_run/low_f0/ledge/ledge_C2_good.wav"
-
-  },
-
+  "targets": ["AE"],
+  "vowel_length": 0.19,
+  "pad_ms": [0.015, 0.0],
+  "crossfade_time": [1, 25],
+  "tolerance": 0.59,
+  "max_percent_distance": 0.0035,
+  "vowel_volume_scaling_factor": 1.0,
+  "c1_scale": 1.1,
+  "trim_style": "keep_end",
+  "regenerate_audio": false,
+    "force_optimize": true
+},
   {
-    "output_root": "./generated_cvc_final/dedge_run/low_f0",
-    "items": [
-      ["L EH JH", "ledge"]
-    ],
-    "f0f3f4": { "f0": 130, "f3": 2841, "f4": 3568 },
+  "output_root": "./generated_cvc_final/dijh_dejh_dajh_run/high_f0",
+
+  "items": [
+    ["D AE JH", "dajh"]
+  ],
+
+
+    "c1_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/SH/cut/desh_base_beginning.wav",
+    "vowel_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/JH/cut/dajh_base_middle_buffered.wav",
+    "c2_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/JH/cut/dijh_base_end.wav",
+
+    "reference_vowel_path": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/JH/cut/dijh_base_middle.wav",
+
+  "f0f3f4": { "f0": 130, "f3": 2800, "f4": 4000},
+
     "vowel_targets": [
-      { "vowel": "EH", "f1": 556.000, "f2": 1791.000, "label": "EH_PNW" },
-      { "vowel": "AE", "f1": 770.000, "f2": 1624.0, "label": "AE_Optimized" },
-      { "vowel": "IH", "f1": 441.000, "f2": 1942.000, "label": "IH_PNW" },
 
-
-      { "vowel": "IH", "f1": 386.462, "f2": 1977.385, "label": "IH_PB" },
-      { "vowel": "EH", "f1": 535.143, "f2": 1868.286, "label": "EH_PB" },
-
-      { "vowel": "IH", "f1": 413.731, "f2": 1959.692, "label": "IH_AVG" },
-      { "vowel": "EH", "f1": 545.572, "f2": 1829.643, "label": "EH_AVG" }
+      {
+        "vowel": "IH",
+        "label": "IH_Optimized",
+        "f1": 433.2,
+        "f2": 1962.9,
+        "pregenerated_vowel_location": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/JH/cut/dajh_base_middle_buffered.wav"
+      },
+      {
+        "vowel": "AE",
+        "label": "AE_Optimized",
+        "f1": 754.70,
+        "f2": 1638.8,
+        "pregenerated_vowel_location": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/JH/cut/dajh_base_middle_buffered.wav"
+      },
+      {
+        "vowel": "EH",
+        "label": "EH_Optimized",
+        "f1": 589.5,
+        "f2": 1801.1,
+        "pregenerated_vowel_location": "/home/michaelbennie/PycharmProjects/CVC_Stimuli_For_Hearing_Loss_Studies/src/speechGeneration/AI_Words/D/JH/cut/dajh_base_middle_buffered.wav"
+      }
     ],
-    "targets": ["EH"],
-    "vowel_length": 0.19,
-    "pad_ms": [-0.0200, -0.169],
-    "crossfade_time": [6, 20],
-    "tolerance": 0.87,
-    "regenerate_audio": false,
-    "max_percent_distance": 0.0035,
-    "vowel_volume_scaling_factor": 0.8,
-    "c1_scale": 0.4,
-    "trim_style": "keep_end",
-    "c1_path": "./generated_cvc_final/dish_desh_dash_run/low_f0/desh/desh_C1_20250724125823.wav",
-    "c2_path": "./generated_cvc_final/dedge_run/low_f0/ledge/ledge_C2_good.wav"
-
-  },
-
-    {
-    "output_root": "./generated_cvc_final/deaf_run/low_f0",
-    "items": [
-      ["D EH F", "deaf"]
-    ],
-    "f0f3f4": { "f0": 130, "f3": 2841, "f4": 3568 },
-    "vowel_targets": [
-      { "vowel": "AE", "f1": 770.000, "f2": 1624.0, "label": "AE_Optimized" },
-
-      { "vowel": "EH", "f1": 556.000, "f2": 1791.000, "label": "EH_PNW" },
-      { "vowel": "IH", "f1": 441.000, "f2": 1942.000, "label": "IH_PNW" },
-
-
-      { "vowel": "IH", "f1": 386.462, "f2": 1977.385, "label": "IH_PB" },
-      { "vowel": "EH", "f1": 535.143, "f2": 1868.286, "label": "EH_PB" },
-
-      { "vowel": "IH", "f1": 413.731, "f2": 1959.692, "label": "IH_AVG" },
-      { "vowel": "EH", "f1": 545.572, "f2": 1829.643, "label": "EH_AVG" }
-    ],
-    "targets": ["EH"],
-    "vowel_length": 0.19,
-    "pad_ms": [0.0105, -0.020],
-    "crossfade_time": [10, 120],
-    "tolerance": 0.87,
-    "regenerate_audio": false,
-    "max_percent_distance": 0.0035,
-    "vowel_volume_scaling_factor": 1,
-    "c1_scale": 0.8,
-    "trim_style": "keep_middle",
-    "c1_path": "./generated_cvc_final/dish_desh_dash_run/low_f0/desh/desh_C1_20250724125823.wav"
-
-  },
-  {
-    "output_root": "./generated_cvc_final/deaf_run/high_f0",
-    "items": [
-      ["D EH F", "deaf"]
-    ],
-    "f0f3f4": { "f0": 145.92, "f3": 2841, "f4": 3568 },
-    "vowel_targets": [
-      { "vowel": "EH", "f1": 556.000, "f2": 1791.000, "label": "EH_PNW" },
-      { "vowel": "AE", "f1": 770.000, "f2": 1624.0, "label": "AE_Optimized" },
-      { "vowel": "IH", "f1": 441.000, "f2": 1942.000, "label": "IH_PNW" },
-
-
-      { "vowel": "IH", "f1": 386.462, "f2": 1977.385, "label": "IH_PB" },
-      { "vowel": "EH", "f1": 535.143, "f2": 1868.286, "label": "EH_PB" },
-
-      { "vowel": "IH", "f1": 413.731, "f2": 1959.692, "label": "IH_AVG" },
-      { "vowel": "EH", "f1": 545.572, "f2": 1829.643, "label": "EH_AVG" }
-    ],
-    "targets": ["EH"],
-    "vowel_length": 0.19,
-    "pad_ms": [0.0105, -0.020],
-    "crossfade_time": [10, 120],
-    "tolerance": 0.87,
-    "regenerate_audio": false,
-    "max_percent_distance": 0.0035,
-    "vowel_volume_scaling_factor": 1,
-    "c1_scale": 0.8,
-    "trim_style": "keep_middle",
-    "c1_path": "./generated_cvc_final/dish_desh_dash_run/low_f0/desh/desh_C1_20250724125823.wav"
-
-  },
-
-    {
-    "output_root": "./generated_cvc_final/dish_desh_dash_run/low_f0",
-    "items": [
-
-      ["D EH SH", "desh"]
-    ],
-    "f0f3f4": {"f0":130 , "f3": 2841, "f4": 3568},
-    "vowel_targets": [
-      { "vowel": "AE", "f1": 770.000, "f2": 1624.0, "label": "AE_Optimized" },
-
-      { "vowel": "IH", "f1": 441.000, "f2": 1942.000, "label": "IH_PNW" },
-      { "vowel": "EH", "f1": 556.000, "f2": 1791.000, "label": "EH_PNW" },
-
-      { "vowel": "IH", "f1": 386.462, "f2": 1977.385, "label": "IH_PB" },
-      { "vowel": "EH", "f1": 535.143, "f2": 1868.286, "label": "EH_PB" },
-
-      { "vowel": "IH", "f1": 413.731, "f2": 1959.692, "label": "IH_AVG" },
-      { "vowel": "EH", "f1": 545.572, "f2": 1829.643, "label": "EH_AVG" }
-    ],
-    "targets": ["EH"],
-    "vowel_length": 0.19,
-    "pad_ms": [0.015, 0.00],
-    "crossfade_time": [1,40],
-    "tolerance": 0.87,
-      "regenerate_audio": false,
-    "max_percent_distance": 0.0035,
-      "vowel_volume_scaling_factor": 1.5,
-      "c1_scale": 1.4,
-  "trim_style": "keep_end"
-  },
-    {
-    "output_root": "./generated_cvc_final/dish_desh_dash_run/high_f0",
-    "items": [
-
-      ["D EH SH", "desh"]
-    ],
-    "f0f3f4": {"f0":145.92 , "f3": 2841, "f4": 3568},
-    "vowel_targets": [
-      { "vowel": "AE", "f1": 770.000, "f2": 1624.0, "label": "AE_Optimized" },
-
-      { "vowel": "IH", "f1": 441.000, "f2": 1942.000, "label": "IH_PNW" },
-      { "vowel": "EH", "f1": 556.000, "f2": 1791.000, "label": "EH_PNW" },
-
-      { "vowel": "IH", "f1": 386.462, "f2": 1977.385, "label": "IH_PB" },
-      { "vowel": "EH", "f1": 535.143, "f2": 1868.286, "label": "EH_PB" },
-
-      { "vowel": "IH", "f1": 413.731, "f2": 1959.692, "label": "IH_AVG" },
-      { "vowel": "EH", "f1": 545.572, "f2": 1829.643, "label": "EH_AVG" }
-    ],
-    "targets": ["EH"],
-    "vowel_length": 0.19,
-    "pad_ms": [0.015, 0.00],
-    "crossfade_time": [1,40],
-    "tolerance": 0.87,
-      "regenerate_audio": false,
-    "max_percent_distance": 0.0035,
-      "vowel_volume_scaling_factor": 1.5,
-      "c1_scale": 1.4,
-  "trim_style": "keep_end"
-  }
+  "targets": ["AE"],
+  "vowel_length": 0.19,
+  "pad_ms": [0.015, 0.0],
+  "crossfade_time": [1, 25],
+  "tolerance": 0.59,
+  "max_percent_distance": 0.0035,
+  "vowel_volume_scaling_factor": 1.0,
+  "c1_scale": 1.1,
+  "trim_style": "keep_end",
+  "regenerate_audio": false,
+    "force_optimize": true
+}
 ]

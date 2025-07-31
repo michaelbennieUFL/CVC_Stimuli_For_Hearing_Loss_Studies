@@ -94,14 +94,18 @@ def generate_vowel_variants(
     vowel_phoneme: str,
     targets: Sequence[Dict[str, float]],
     dest_dir: Path | str,
+    *,
     tolerance: float = 50.0,
     max_iters: int = 40,
     crossfade_time=3,
     vowel_length=None,
-trim_style="keep_middle",
+    trim_style="keep_middle",
     max_percent_distance=0.002,
-vowel_volume_scaling_factor=0.3,
-c1_scale=1,
+    vowel_volume_scaling_factor=0.3,
+    c1_scale: float = 1.0,
+    force_optimize: bool = False,
+    reference_vowel_path: Path | str | None = None
+
 ) -> List[Tuple[Path, str]]:
     """Create *n* vowel‑tuned versions of an existing vowel chunk.
 
@@ -132,12 +136,13 @@ c1_scale=1,
     rebuilt: List[Tuple[Path, str]] = []
 
     for i, spec in enumerate(targets):
+
         pregenerated = (
-                   spec.get("pregenerated_vowel_location")  # preferred name
-         or spec.get("optimized_vowel_location")  # legacy/alias
+                    spec.get("pregenerated_vowel_location")
+         or spec.get("optimized_vowel_location")
         )
 
-        if pregenerated:
+        if pregenerated and not force_optimize:
             mod_vowel = Path(pregenerated).expanduser().resolve()
             if not mod_vowel.exists():
                 print(f"[WARN] Missing pregenerated vowel «{pregenerated}» – skipping spec.")
@@ -146,9 +151,10 @@ c1_scale=1,
             # 1) run HiFi-Glot optimisation as before
             tgt_out = dest_dir / f"tuned_{i}"
             tgt_out.mkdir(parents=True, exist_ok=True)
+            tgt_src = Path(pregenerated).expanduser().resolve() if pregenerated else vowel_wav
             try:
                 _, _ = tune_formants(
-                       wav_file = vowel_wav,
+                       wav_file = tgt_src,
                    output_dir = tgt_out,
                    target = spec,
                    tolerance = tolerance,
@@ -165,8 +171,11 @@ c1_scale=1,
         label = spec.get("label", f"var{i}")
         out_path = dest_dir / f"cvc_variant_{vowel_phoneme}_{label}.wav"
 
-        ref_vowel = mod_vowel if pregenerated else vowel_wav
-
+        ref_vowel = (
+            Path(reference_vowel_path).expanduser().resolve()
+            if reference_vowel_path
+            else (mod_vowel if (pregenerated and not force_optimize) else vowel_wav)
+        )
 
         recombine_cvc_audio(
             c1_scale=c1_scale,
@@ -261,8 +270,11 @@ c1_scale=1,
     max_percent_distance=0.03,
     regenerate_audio: bool = True,
     fixed_c1_path: str | Path | None = None,
+    fixed_vowel_path: str | Path | None = None,
     fixed_c2_path: str | Path | None = None,
-vowel_volume_scaling_factor=0.3,
+    reference_vowel_path: str | Path | None = None,
+    force_optimize: bool = False,
+    vowel_volume_scaling_factor=0.3,
     **generate_split_kwargs,
 ) -> None:
 
@@ -283,28 +295,25 @@ vowel_volume_scaling_factor=0.3,
 
         # 1. synthesize base word
         raw_cvc_path = work_dir / f"{slug}_base.wav"
-        if regenerate_audio or not raw_cvc_path.exists():
+        if regenerate_audio:
             tts.speak_phonemes(phoneme_str, output_path=str(raw_cvc_path))
         else:
             print(f"[INFO] Skipping TTS synthesis for '{word}' – reusing existing audio.")
 
-        # 2. split into C1 / V / C2
-        split_args = dict(
-            wav_path=str(raw_cvc_path),
-            transcript=word,
-            out_dir=str(work_dir),
-            **generate_split_kwargs,
-        )
-        if pad_ms is not None:
-            split_args["pad_ms"] = pad_ms
+        # 2. obtain C1 / V / C2 – skip forced aligner if caller supplies all 3
 
-        c1_path, v_path, c2_path = generate_splitAudio(**split_args)
-
-        if fixed_c1_path:
+        if fixed_c1_path and fixed_vowel_path and fixed_c2_path:
             c1_path = Path(fixed_c1_path).expanduser().resolve()
-        if fixed_c2_path:
+            v_path = Path(fixed_vowel_path).expanduser().resolve()
             c2_path = Path(fixed_c2_path).expanduser().resolve()
-
+        else:
+            split_args = dict(
+                wav_path=str(raw_cvc_path),
+                transcript=word,
+                out_dir=str(work_dir),
+                **generate_split_kwargs,
+            )
+            c1_path, v_path, c2_path = generate_splitAudio(**split_args)
         # 3. get vowel and variants
         vowel = _extract_vowel(phoneme_str)
         specs = vowel_targets.get(vowel, [])
@@ -336,6 +345,8 @@ vowel_volume_scaling_factor=0.3,
         vowel_volume_scaling_factor=vowel_volume_scaling_factor,
         trim_style=trim_style,
             c1_scale=c1_scale,
+            reference_vowel_path=reference_vowel_path,
+            force_optimize=force_optimize,
         )
 
         # 4. Create discordant stereo pairs
@@ -529,6 +540,10 @@ def load_cvc_runs(json_data_or_path: Union[str, Path, list]) -> List[dict]:
 
         cfg_norm["fixed_c1_path"] = cfg.get("c1_path") or None
         cfg_norm["fixed_c2_path"] = cfg.get("c2_path") or None
+        cfg_norm["fixed_vowel_path"] = cfg.get("vowel_path") or None
+
+        cfg_norm["reference_vowel_path"] = cfg.get("reference_vowel_path") or None
+        cfg_norm["force_optimize"] = bool(cfg.get("force_optimize", False))
 
         trim_style = cfg.get("trim_style", "keep_middle")
         if trim_style not in {"keep_start", "keep_middle", "keep_end"}:
@@ -614,6 +629,8 @@ def run_cvc_from_configs(
             fixed_c1_path = r["fixed_c1_path"],
             fixed_c2_path = r["fixed_c2_path"],
             vowel_volume_scaling_factor=r["vowel_volume_scaling_factor"],
+            force_optimize=r["force_optimize"],
+            fixed_vowel_path = r["fixed_vowel_path"],
             **generate_split_kwargs,
         )
 

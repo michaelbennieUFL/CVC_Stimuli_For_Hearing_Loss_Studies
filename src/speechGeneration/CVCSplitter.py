@@ -502,7 +502,9 @@ def recombine_cvc_audio(               # ← NEW SIGNATURE
 
     # Normalize loudness
     audio_cvc = match_rms(audio_cvc, target_dBFS=-27.0)
-    audio_cvc.export(out_p, format="wav")
+    audio_cvc = audio_cvc.set_sample_width(32 // 8)
+    codec_map = {16: "pcm_s16le", 24: "pcm_s24le", 32: "pcm_s32le"}
+    audio_cvc.export(out_p, format="wav", codec=codec_map[32])
 
     return out_p
 

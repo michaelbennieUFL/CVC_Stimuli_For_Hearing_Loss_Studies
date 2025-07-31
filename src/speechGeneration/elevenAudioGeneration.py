@@ -113,7 +113,7 @@ class PhonemeTTSEngine:
         if speed_factor != 1.0:
             audio_bytes = speed_up_audio(audio_bytes, speed_factor)
 
-        play(audio_bytes)
+        #play(audio_bytes)
 
         return audio_bytes
 

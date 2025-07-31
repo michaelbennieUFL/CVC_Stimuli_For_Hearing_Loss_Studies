@@ -6,10 +6,12 @@ from __future__ import annotations
 
 import subprocess
 import time
+from collections import defaultdict
 from pathlib import Path
 import concurrent.futures, math, os, shutil, tempfile, uuid
 import random
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from time import sleep
 from typing import List, Tuple, Iterable
 import numpy as np
 import parselmouth
@@ -24,6 +26,7 @@ from src.speechGeneration.CVCSplitter import generate_splitAudio, generate_conve
 from src.speechGeneration.elevenAudioGeneration import PhonemeTTSEngine
 import os
 import concurrent.futures as _cf
+os.environ["TMPDIR"] = os.path.expanduser("~/tmp")
 
 os.environ["MFA_DISABLE_HISTORY"] = "true"
 # ───────── utility helpers ───────────────────────────────────────────
@@ -79,11 +82,11 @@ def cost(stats, tgt_f0, tgt_f1, tgt_f2, wav_len, tgt_len, len_weight):
     # Handle missing F0
     if stats["mean_f0"] is None or math.isnan(stats["mean_f0"]):
         return float("inf")  # Worst possible score
-    if wav_len<tgt_len*0.8:
+    if wav_len<tgt_len*0.95 or wav_len>tgt_len*1.2:
         return float("inf")
     if tgt_f0<120 or tgt_f0>150:
         return float("inf")
-    return (abs(tgt_f0 - stats["mean_f0"]) ** 2
+    return (abs(tgt_f0 - stats["mean_f0"]) ** 2 *2
           + (1 + (stats["sd_f0"] or 0)) ** 2 * 4
           + abs(tgt_f1 - stats["mean_f1"]) * 2
           + abs(tgt_f2 - stats["mean_f2"]) * 2
@@ -216,6 +219,7 @@ def _worker_generate(
     wav_path = tmp_root / f"take_{idx}_{uuid.uuid4().hex}.wav"
     for attempt in range(MAX_RETRIES):
         try:
+            sleep(random.uniform(0.001,0.08))
             PhonemeTTSEngine(api_key, voice_id,
                         stability=0.4, speed=speed
             ).speak_phonemes(phonemes, output_path=str(wav_path))
@@ -306,9 +310,9 @@ def run_mfa_align(
             "--clean",
             "--output_format", "short_textgrid",
             "--single_speaker",
-            "--beam", "15",
-            "--retry_beam", "80",
-            "--num_jobs", str(num_jobs)
+            "--beam", "10",
+            "--retry_beam", "25",
+            "--num_jobs", str(22)
         ]
 
         # 运行命令并捕获输出
@@ -363,15 +367,19 @@ def analyse_and_score(
     wav_path: Path,
     tg_path: Path,
     *,
-    vowels: Iterable[str],
     target_f0: float,
     target_f1: float,
     target_f2: float,
     target_vlen: float,
     len_weight: float,
     work_dir: Path,
+    vowels: Iterable[str] | None = None,
 ) -> tuple[str, float, dict, float, Path]:
     """Return (label, score, stats, vowel_len, wav_path)."""
+
+    vowels = vowels or ["AA", "AE", "AH", "AO", "AW", "AY", "EH", "ER", "EY",
+                        "IH", "IY", "OW", "OY", "UH", "UW"]
+
 
     # 1. extract vowel span ------------------------------------------------
     spans = segment_vowels(wav_path, vowels, tg_path=tg_path)
@@ -646,11 +654,16 @@ if __name__ == "__main__":
 
     # C₁→C₂ mapping (spaces optional after commas in the original note)
     C1_C2_MAP = {
-        "JH": ["G", "T", "SH", "TH", "JH"],
-        "G": ["G", "T", "TH"],
+        "D": ["SH", "F", "D", "JH",  "Z"],
+        "JH": ["G", "T", "SH", "TH",],
         "L": ["P", "JH", "D", "DH", "TH", "Z"],
-        "D": ["SH", "F", "JH", "D", "Z"],
+        "G": ["G", "T", "TH"],
+
     }
+    print(tempfile.gettempdir())
+    print("TMPDIR =", tempfile.gettempdir())
+    print(subprocess.check_output(["df", "-h", tempfile.gettempdir()]).decode())
+
 
     API_KEY = "sk_021896141aee88cc1eca629bdcc92043066224cb9a5f98d5"
     VOICE_ID = "b3tuFWghbXYRa9Cs9MJf"
@@ -660,11 +673,11 @@ if __name__ == "__main__":
         api_key=API_KEY,
         voice_id=VOICE_ID,
         target_f0=130.0,
-        target_vlen=0.2,
-        len_weight=100.0,
-        n_trials=450,
+        target_vlen=0.20,
+        len_weight=50.0,
+        n_trials=600,
         n_threads=60,
-        speed_range=(0.7, 1.15),
+        speed_range=(0.7, 1.2),
     )
     main(SEARCH_KWARGS)
 
