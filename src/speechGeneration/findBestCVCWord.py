@@ -82,9 +82,9 @@ def cost(stats, tgt_f0, tgt_f1, tgt_f2, wav_len, tgt_len, len_weight):
     # Handle missing F0
     if stats["mean_f0"] is None or math.isnan(stats["mean_f0"]):
         return float("inf")  # Worst possible score
-    if wav_len<tgt_len*0.95 or wav_len>tgt_len*1.2:
+    if wav_len<tgt_len*0.96 or wav_len>tgt_len*1.1:
         return float("inf")
-    if tgt_f0<120 or tgt_f0>150:
+    if stats["mean_f0"]<120 or stats["mean_f0"]>150:
         return float("inf")
     return (abs(tgt_f0 - stats["mean_f0"]) ** 2 *2
           + (1 + (stats["sd_f0"] or 0)) ** 2 * 4
@@ -628,7 +628,7 @@ def main(SEARCH_KWARGS):
                 word     = spell_out(c1, vowel, c2)
 
                 # Build output path ./AI_Words/<C1>/<C2>/<word>_base.wav
-                out_dir  = Path("AI_Words") / c1 / c2
+                out_dir  = Path("AI_Words_V2") / c1 / c2
                 out_dir.mkdir(parents=True, exist_ok=True)
                 dst_wav  = out_dir / f"{word}_base.wav"
 
@@ -647,16 +647,15 @@ def main(SEARCH_KWARGS):
 if __name__ == "__main__":
     # Target formant values for each vowel
     VOWEL_TARGETS = {
-        "AE": {"f1": 741.2, "f2": 1664.3},
-        "EH": {"f1": 589.7, "f2": 1792.8},
-        "IH": {"f1": 438.1, "f2": 1921.4},
+        "AE": {"f1": 754.70, "f2": 1638.8,},
+        "EH": { "f1": 589.5, "f2": 1801.1,},
     }
 
     # C₁→C₂ mapping (spaces optional after commas in the original note)
     C1_C2_MAP = {
-        "D": ["SH", "F", "D", "JH",  "Z"],
+        "D": [ "D",],
         "JH": ["G", "T", "SH", "TH",],
-        "L": ["P", "JH", "D", "DH", "TH", "Z"],
+        "L": ["P", "JH", "D", "DH", "Z"],
         "G": ["G", "T", "TH"],
 
     }
