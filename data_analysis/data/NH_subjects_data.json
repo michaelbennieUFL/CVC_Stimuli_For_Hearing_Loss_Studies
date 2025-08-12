@@ -1,0 +1,70 @@
+[
+    {
+        "ID": "NH290",
+        "Origin": "Beaverton, Oregon",
+        "Native_English": true,
+        "American_English": true,
+        "Vocab_score": 242,
+        "Mono_Word_Sounds": "Clear",
+        "Mono_Word_vowels": "Singular",
+        "AE_Vowels": "sounds like ae eh",
+        "Qualitative_fusion": [
+            "two full words",
+            "one word",
+            "two words+ vowel",
+            "heard full for one and beginning CV for other word"
+        ],
+        "Centralized_And_laterized_sound": false,
+        "Dichotic_Heard_vowels": ["AE", "IH", "EH"]
+    },
+    {
+        "ID": "NH291",
+        "Origin": "Portland, Oregon",
+        "Native_English": true,
+        "American_English": true,
+        "Vocab_score": 194,
+        "Mono_Word_Sounds": "Clear",
+        "Mono_Word_vowels": "Singular",
+        "AE_Vowels": "sounds like ae eh",
+        "Qualitative_fusion": [
+            "two full words",
+            "one word"
+        ],
+        "Centralized_And_laterized_sound": false,
+        "Dichotic_Heard_vowels": ["AE", "IH", "EH"]
+    },
+    {
+        "ID": "NH292",
+        "Origin": "Portland, Oregon",
+        "Native_English": true,
+        "American_English": true,
+        "Vocab_score": 272,
+        "Mono_Word_Sounds": "Unclear",
+        "Mono_Word_vowels": "Singular",
+        "AE_Vowels": "sounds like ae uh eh",
+        "Qualitative_fusion": [
+            "two full words",
+            "one word",
+            "Dipthongs",
+            "heard full for one and beginning CV for other word"
+        ],
+        "Centralized_And_laterized_sound": true,
+        "Dichotic_Heard_vowels": ["AE", "IH", "EH", "AY", "IY"]
+    },
+    {
+        "ID": "NH293",
+        "Origin": "Portland, Oregon",
+        "Native_English": true,
+        "American_English": true,
+        "Vocab_score": 314,
+        "Mono_Word_Sounds": "Clear",
+        "Mono_Word_vowels": "Singular",
+        "AE_Vowels": "sounds like ae eh",
+        "Qualitative_fusion": [
+            "two full words",
+            "heard full for one and beginning CV for other word"
+        ],
+        "Centralized_And_laterized_sound": true,
+        "Dichotic_Heard_vowels": ["AE", "IH", "EH"]
+    }
+]
