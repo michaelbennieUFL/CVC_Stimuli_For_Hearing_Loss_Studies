@@ -66,5 +66,40 @@
         ],
         "Centralized_And_laterized_sound": true,
         "Dichotic_Heard_vowels": ["AE", "IH", "EH"]
+    },
+
+  {
+    "ID": "NH299",
+
+    "MMSE_passed": true,
+    "Audiogram_passed": true,
+    "Tympanometry_passed": true,
+    "Other_passed": true,
+
+    "dominant_hand": "left",
+    "perfect_pitch": "no",
+    "hearing_impairment": {},
+    "noise_exposure": {},
+    "tinnitus": {"ear": "both","start_year":1999,"currently_experiencing":true,"frequency":"always"},
+    "Native_English": true,
+    "American_English": true,
+    "Origin": "Portland, Oregon",
+    "Additional_Languages": ["Mandarin"],
+    "Headphone_use": {"hours_per_day": 1},
+    "musical_experience": {},
+
+    "Vocab_score": 349,
+    "Monaural_commants_first": ["AE and EH close", "British Accent","SH ending issues"],
+    "Monaural_commants_end": {"Word_Clarity": "clear","Vowels_Heard": ["IN","EH","AE","AH","UH"],"IH_Clarity": ["IH"],"EH_Clarity": ["EH","IH"],"AE_Clarity": ["AE","EH","AH","UH"],"Number_of_Vowels": 1},
+
+    "Mono_Word_Sounds": "Clear",
+    "Mono_Word_vowels": "Singular",
+    "AE_Vowels": "sounds like ae eh",
+    "Qualitative_fusion": [
+        "two full words",
+        "heard full for one and beginning CV for other word"
+    ],
+    "Centralized_And_laterized_sound": true,
+    "Dichotic_Heard_vowels": ["AE", "IH", "EH"]
     }
 ]

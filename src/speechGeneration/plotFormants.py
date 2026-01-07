@@ -36,20 +36,35 @@ def extract_formants(
 
 
 def split_stereo_wav(wav_path: Path):
+    """Return paths to left/right mono WAVs. If input is mono, right is None."""
     rate, data = wavfile.read(wav_path)
-    if data.ndim != 2 or data.shape[1] != 2:
-        raise ValueError("Audio is not stereo.")
 
-    left_path = NamedTemporaryFile(delete=False, suffix=".wav").name
-    right_path = NamedTemporaryFile(delete=False, suffix=".wav").name
+    # MONO
+    if data.ndim == 1:
+        mono_path = NamedTemporaryFile(delete=False, suffix=".wav").name
+        wavfile.write(mono_path, rate, data)
+        return Path(mono_path), None
 
-    wavfile.write(left_path, rate, data[:, 0])
-    wavfile.write(right_path, rate, data[:, 1])
-    return Path(left_path), Path(right_path)
+    # STEREO
+    if data.ndim == 2 and data.shape[1] == 2:
+        left_path = NamedTemporaryFile(delete=False, suffix=".wav").name
+        right_path = NamedTemporaryFile(delete=False, suffix=".wav").name
+        wavfile.write(left_path, rate, data[:, 0])
+        wavfile.write(right_path, rate, data[:, 1])
+        return Path(left_path), Path(right_path)
+
+    raise ValueError("Unsupported audio shape. Expected mono or stereo WAV.")
 
 
 def hz_to_bark(f):
+    f = np.asarray(f)
     return (26.81 * f) / (1960 + f) - 0.53
+
+
+def bark_to_hz(z):
+    # Inverse of the Zwicker/Bark mapping used above
+    z = np.asarray(z)
+    return 1960.0 / (26.81 / (z + 0.53) - 1.0)
 
 
 def _find_segments(mask, times):
@@ -72,95 +87,124 @@ def _find_segments(mask, times):
 def plot_formants(
     wav_path: str | Path,
     use_bark: bool = True,
-    diff_threshold: float = 1.0,      # in Bark
+    diff_threshold: float = 1.0,      # in Bark (or Hz if use_bark=False)
     diff_color: str = "red",
     diff_alpha: float = 0.25,
     interp_step: float = 0.005        # seconds
 ):
     """
-    Plot left- vs right-channel formants/F0 and highlight any time region
-    where |Left – Right| >= diff_threshold Bark on *any* formant track.
+    If stereo: plot left vs right and highlight regions where |L–R| >= diff_threshold.
+               Also plot the average of F1 and F2 *inside those red regions only*.
+    If mono:   plot a single set of formants/F0 (no difference regions).
     """
     wav_path = Path(wav_path)
     left_wav, right_wav = split_stereo_wav(wav_path)
+    is_mono = right_wav is None
 
     # --- extract formants ---------------------------------------------------
-    sound_left  = parselmouth.Sound(str(left_wav))
-    sound_right = parselmouth.Sound(str(right_wav))
-
+    sound_left = parselmouth.Sound(str(left_wav))
     tL, f0L, fL = extract_formants(sound_left)
-    tR, f0R, fR = extract_formants(sound_right)
+
+    if not is_mono:
+        sound_right = parselmouth.Sound(str(right_wav))
+        tR, f0R, fR = extract_formants(sound_right)
 
     # --- convert to Bark if requested --------------------------------------
     if use_bark:
         f0L = hz_to_bark(f0L)
-        f0R = hz_to_bark(f0R)
         fL  = [hz_to_bark(track) for track in fL]
-        fR  = [hz_to_bark(track) for track in fR]
-
-    # --- build a common time grid ------------------------------------------
-    t_start = max(tL[0], tR[0])
-    t_end   = min(tL[-1], tR[-1])
-    common_t = np.arange(t_start, t_end, interp_step)
-
-    # interpolate every track onto that grid
-    L_tracks = [np.interp(common_t, tL, track) for track in fL]
-    R_tracks = [np.interp(common_t, tR, track) for track in fR]
-
-    # you can add F0 here too by uncommenting the next two lines
-    # L_tracks.append(np.interp(common_t, tL, f0L))
-    # R_tracks.append(np.interp(common_t, tR, f0R))
-
-    # --- detect where ANY track differs by >= threshold --------------------
-    diff_mask = np.zeros_like(common_t, dtype=bool)
-    for Lt, Rt in zip(L_tracks, R_tracks):
-        diff_mask |= np.abs(Lt - Rt) >= diff_threshold
-
-    diff_segments = _find_segments(diff_mask, common_t)
+        if not is_mono:
+            f0R = hz_to_bark(f0R)
+            fR  = [hz_to_bark(track) for track in fR]
 
     # --- plotting -----------------------------------------------------------
-    plt.figure(figsize=(14, 8))
-    plt.title("Formant Comparison (Left vs Right Channel)\n"
-              f"Red regions: |Δ| ≥ {diff_threshold} Bark")
-
-    colors_left  = ["blue",  "green", "purple",   "magenta",       "navy"]
-    colors_right = ["cyan",  "lime",  "orchid",   "hotpink",       "darkturquoise"]
-
-    # Formants F1–F5
-    for i in range(4):
-        plt.plot(tL, fL[i], label=f"F{i+1} Left",  color=colors_left[i])
-        plt.plot(tR, fR[i], label=f"F{i+1} Right", color=colors_right[i],
-                 linestyle="--")
-
-    # F0 (optional)
-    plt.plot(tL, f0L, label="F0 Left",  color="red",   linewidth=2)
-    plt.plot(tR, f0R, label="F0 Right", color="orange", linestyle="--",
-             linewidth=2)
-
-    # highlight regions with big differences
-    for start, end in diff_segments:
-        plt.axvspan(start, end, color=diff_color, alpha=diff_alpha, zorder=0)
-
-    plt.xlabel("Time (s)")
-    if use_bark:
-        plt.ylabel("Bark Scale")
-        plt.yticks(np.arange(0, 20.5, 0.5))
-        plt.ylim(0, 20)
+    fig, ax = plt.subplots(figsize=(14, 8))
+    if is_mono:
+        ax.set_title("Formants (Mono)")
     else:
-        plt.ylabel("Frequency (Hz)")
-        plt.yscale("log")
+        ax.set_title("Formant Comparison (Left vs Right Channel)\n"
+                     f"Red regions: |Δ| ≥ {diff_threshold} {'Bark' if use_bark else 'Hz'}")
 
-    plt.legend(loc="upper right")
-    plt.grid(True)
-    plt.tight_layout()
+    colors_left  = ["blue", "green", "purple", "magenta", "navy"]
+    colors_right = ["cyan", "lime", "orchid", "hotpink", "darkturquoise"]
+
+    # Formants F1–F4
+    for i in range(4):
+        label = f"F{i+1}" + ("" if is_mono else " Left")
+        ax.plot(tL, fL[i], label=label, color=colors_left[i])
+        if not is_mono:
+            ax.plot(tR, fR[i], label=f"F{i+1} Right", color=colors_right[i], linestyle="--")
+
+    # F0
+    ax.plot(tL, f0L, label="F0" + ("" if is_mono else " Left"), color="red", linewidth=2)
+    if not is_mono:
+        ax.plot(tR, f0R, label="F0 Right", color="orange", linestyle="--", linewidth=2)
+
+    # --- highlight regions + average F1/F2 in those regions (stereo only) ---
+    if not is_mono:
+        # Build a common time grid
+        t_start = max(tL[0], tR[0])
+        t_end   = min(tL[-1], tR[-1])
+        common_t = np.arange(t_start, t_end, interp_step)
+
+        # Interpolate F1..F4 onto that grid
+        L_tracks = [np.interp(common_t, tL, track) for track in fL]
+        R_tracks = [np.interp(common_t, tR, track) for track in fR]
+
+        # Difference mask using any formant track
+        diff_mask = np.zeros_like(common_t, dtype=bool)
+        for Lt, Rt in zip(L_tracks, R_tracks):
+            diff_mask |= np.abs(Lt - Rt) >= diff_threshold
+
+        # Shade the regions
+        for start, end in _find_segments(diff_mask, common_t):
+            ax.axvspan(start, end, color=diff_color, alpha=diff_alpha, zorder=0)
+
+        # --- Averages for F1 and F2 in red regions only ---------------------
+        # Prepare masked arrays (NaN outside red regions so nothing is drawn there)
+        if np.any(diff_mask):
+            avg_F1 = (L_tracks[0] + R_tracks[0]) / 2.0
+            avg_F2 = (L_tracks[1] + R_tracks[1]) / 2.0
+
+            avg_F1_plot = np.where(diff_mask, avg_F1, np.nan)
+            avg_F2_plot = np.where(diff_mask, avg_F2, np.nan)
+
+            ax.plot(common_t, avg_F1_plot, linewidth=3, label="Avg F1 (red regions)")
+            ax.plot(common_t, avg_F2_plot, linewidth=3, linestyle="--", label="Avg F2 (red regions)")
+        # else: no red regions -> do not draw any averages
+
+    ax.set_xlabel("Time (s)")
+    if use_bark:
+        ax.set_ylabel("Bark Scale")
+        ax.set_yticks(np.arange(0, 20.5, 0.5))
+        ax.set_ylim(0, 20)
+
+        # Right-hand y-axis in Hz (tick labels converted from Bark)
+        ax_hz = ax.twinx()
+        bark_ticks = ax.get_yticks()
+        hz_tick_vals = bark_to_hz(bark_ticks)
+        # Clean up extremely high Hz labels outside typical range
+        hz_tick_vals = np.clip(hz_tick_vals, 0, 11000)
+        ax_hz.set_ylim(ax.get_ylim())
+        ax_hz.set_yticks(bark_ticks)
+        ax_hz.set_ylabel("Frequency (Hz)")
+        ax_hz.set_yticklabels([f"{int(v):d}" for v in hz_tick_vals])
+    else:
+        ax.set_ylabel("Frequency (Hz)")
+        ax.set_yscale("log")
+
+    ax.legend(loc="upper right", ncol=2)
+    ax.grid(True)
+    fig.tight_layout()
     plt.show()
 
     # clean up the temp mono files
     os.remove(left_wav)
-    os.remove(right_wav)
-
+    if right_wav is not None:
+        os.remove(right_wav)
 
 
 if __name__ == "__main__":
-    plot_formants("generated_cvc/beg/discordants/cvc_variant_EH_discordant_AE_IH.wav")
-    plot_formants("generated_cvc/beg/discordants/cvc_variant_EH_discordant_AE_|IH_50_AE_50|.wav")
+    # Works for mono and stereo. In stereo, will show Avg F1/F2 only if there are red regions.
+    plot_formants("generated_cvc_final/dif_def_daf_run/low_f0/dash/discordants/cvc_variant_AE_discordant_IH_Optimized_AE_Optimized.wav")
+    plot_formants("generated_cvc_final/dif_def_daf_run/low_f0/dash/cvc_variant_AE_IH_Optimized.wav")
