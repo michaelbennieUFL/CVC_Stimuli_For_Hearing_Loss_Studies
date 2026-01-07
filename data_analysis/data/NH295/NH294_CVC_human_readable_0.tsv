@@ -1,0 +1,10 @@
+Ear: B
+Audiogram left  : NA
+Audiogram right : NA
+Trial	C1	C2	Vowel1	Vowel2	F0_1	F0_2	Ans1V	Ans2V	Ans3V	Ans1C	Ans2C	Ans3C	Ans1	Ans2	Ans3	OneType	BothOK	RT	Ear	Audiogram_Left	Audiogram_Right
+1	G	TH	IH	AE	low_f0	high_f0	AE	NaN	NaN	1	0	0	gath	NaN	NaN	1	0	8.5048	B	NA	NA
+2	L	D	AE	IH	high_f0	high_f0	IH	NaN	NaN	1	0	0	lid	NaN	NaN	1	0	5.5928	B	NA	NA
+3	D	JH	AE	IH	high_f0	high_f0	IH	NaN	NaN	1	0	0	didge	NaN	NaN	1	0	6.8104	B	NA	NA
+4	D	D	AE	IH	low_f0	low_f0	EH	IH	NaN	1	1	0	dead	did	NaN	0	0	11.2452	B	NA	NA
+5	L	P	AE	AE	high_f0	high_f0	AE	NaN	NaN	1	0	0	lap	NaN	NaN	1	1	10.3831	B	NA	NA
+6	G	T	IH	AE	low_f0	high_f0	AE	NaN	NaN	1	0	0	gat	NaN	NaN	1	0	11.2955	B	NA	NA

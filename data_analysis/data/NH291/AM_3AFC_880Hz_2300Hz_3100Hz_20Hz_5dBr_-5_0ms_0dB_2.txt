@@ -1,0 +1,17 @@
+Date: 7.16.2025
+Time: 13:45:21
+Subject ID: NH291
+Reference Frequencies (Hz): 880
+Reference Frequencies (Hz): 2300
+Reference Frequencies (Hz): 3100
+Dur (sec): 300 sec
+Modulation rate (Hz): 20
+Modulation depth: -5
+Onset asynchrony: 0
+Stimtype (0=tone, otherwise number is noise bandwidth): 0
+---------------------------------
+
+***** Stimulus and response details *****
+
+Index	FreqMod	FreqFlat	Rove(dB)	ModEar	Resp	Correct	Reps
+1	880	756		0.79		2	1	0.00	0

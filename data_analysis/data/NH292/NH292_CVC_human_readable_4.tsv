@@ -1,0 +1,32 @@
+Ear: B
+Audiogram left  : NA
+Audiogram right : NA
+Trial	C1	C2	Vowel1	Vowel2	F0_1	F0_2	Ans1V	Ans2V	Ans3V	Ans1C	Ans2C	Ans3C	Ans1	Ans2	Ans3	OneType	BothOK	RT	Ear	Audiogram_Left	Audiogram_Right
+1	G	G	AE	IH	low_f0	high_f0	IH	NaN	NaN	1	0	0	gig	NaN	NaN	1	0	3.2899	B	NA	NA
+2	G	G	IH	AE	low_f0	low_f0	EH	NaN	NaN	1	0	0	geg	NaN	NaN	1	0	1.5580	B	NA	NA
+3	D	D	IH	AE	high_f0	high_f0	AE	NaN	NaN	1	0	0	dad	NaN	NaN	1	0	0.6488	B	NA	NA
+4	D	D	AE	IH	low_f0	high_f0	IH	NaN	NaN	1	0	0	did	NaN	NaN	1	0	0.6813	B	NA	NA
+5	D	JH	AE	IH	high_f0	high_f0	IH	NaN	NaN	1	0	0	didge	NaN	NaN	1	0	1.4264	B	NA	NA
+6	G	G	AE	IH	low_f0	low_f0	IH	NaN	NaN	1	0	0	gig	NaN	NaN	1	0	2.5881	B	NA	NA
+7	D	D	IH	AE	low_f0	low_f0	AE	NaN	NaN	1	0	0	dad	NaN	NaN	1	0	2.9497	B	NA	NA
+8	D	D	AE	IH	high_f0	high_f0	IH	NaN	NaN	1	0	0	did	NaN	NaN	1	0	0.5539	B	NA	NA
+9	G	G	IH	IH	low_f0	high_f0	IH	NaN	NaN	1	0	0	gig	NaN	NaN	1	1	0.8482	B	NA	NA
+10	L	D	IH	AE	low_f0	low_f0	AE	NaN	NaN	1	0	0	lad	NaN	NaN	1	0	0.4461	B	NA	NA
+11	G	T	AE	IH	low_f0	high_f0	IH	NaN	NaN	1	0	0	git	NaN	NaN	1	0	0.6185	B	NA	NA
+12	D	F	EH	EH	high_f0	high_f0	EH	NaN	NaN	1	0	0	deaf	NaN	NaN	1	1	5.6513	B	NA	NA
+13	D	SH	IH	IH	low_f0	high_f0	IH	NaN	NaN	1	0	0	dish	NaN	NaN	1	1	1.7129	B	NA	NA
+14	D	F	EH	EH	low_f0	high_f0	EH	NaN	NaN	1	0	0	deaf	NaN	NaN	1	1	1.0135	B	NA	NA
+15	D	JH	IH	AE	low_f0	high_f0	AE	NaN	NaN	1	0	0	dadge	NaN	NaN	1	0	1.8169	B	NA	NA
+16	G	T	AE	IH	high_f0	high_f0	IH	NaN	NaN	1	0	0	git	NaN	NaN	1	0	1.3451	B	NA	NA
+17	G	T	IH	AE	low_f0	high_f0	AE	NaN	NaN	1	0	0	gat	NaN	NaN	1	0	2.1846	B	NA	NA
+18	L	TH	IH	AE	low_f0	high_f0	AE	NaN	NaN	1	0	0	lath	NaN	NaN	1	0	0.5046	B	NA	NA
+19	L	P	IH	IH	low_f0	high_f0	IH	NaN	NaN	1	0	0	lip	NaN	NaN	1	1	0.4619	B	NA	NA
+20	L	TH	IH	AE	low_f0	low_f0	EH	NaN	NaN	1	0	0	leth	NaN	NaN	1	0	1.0624	B	NA	NA
+21	D	F	AE	AE	low_f0	high_f0	EH	NaN	NaN	1	0	0	deaf	NaN	NaN	1	0	0.8862	B	NA	NA
+22	L	JH	AE	AE	low_f0	low_f0	AE	NaN	NaN	1	0	0	ladge	NaN	NaN	1	1	1.1836	B	NA	NA
+23	D	F	AE	IH	low_f0	low_f0	IH	NaN	NaN	1	0	0	diff	NaN	NaN	1	0	0.4902	B	NA	NA
+24	G	TH	IH	AE	low_f0	high_f0	AE	NaN	NaN	1	0	0	gath	NaN	NaN	1	0	7.3297	B	NA	NA
+25	G	G	IH	AE	low_f0	high_f0	AE	NaN	NaN	1	0	0	gag	NaN	NaN	1	0	1.2533	B	NA	NA
+26	L	JH	IH	AE	low_f0	low_f0	AE	NaN	NaN	1	0	0	ladge	NaN	NaN	1	0	0.4804	B	NA	NA
+27	D	JH	AE	AE	low_f0	high_f0	AE	AE	NaN	1	0	0	dadge	AE	NaN	1	1	97.9998	B	NA	NA
+28	L	D	IH	AE	low_f0	high_f0	AE	NaN	NaN	0	0	0	AE	NaN	NaN	1	0	65.1668	B	NA	NA

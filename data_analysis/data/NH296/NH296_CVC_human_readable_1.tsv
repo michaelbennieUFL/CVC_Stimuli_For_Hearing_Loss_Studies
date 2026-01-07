@@ -1,0 +1,6 @@
+Ear: B
+Audiogram left  : NA
+Audiogram right : NA
+Trial	C1	C2	Vowel1	Vowel2	F0_1	F0_2	Ans1V	Ans2V	Ans3V	Ans1C	Ans2C	Ans3C	Ans1	Ans2	Ans3	OneType	BothOK	RT	Ear	Audiogram_Left	Audiogram_Right
+1	D	F	AE	IH	low_f0	high_f0	AE	NaN	NaN	0	0	0	AE	NaN	NaN	1	0	110.2676	B	NA	NA
+2	L	P	AE	IH	high_f0	high_f0	AE	NaN	NaN	0	0	0	AE	NaN	NaN	1	0	220.4857	B	NA	NA
