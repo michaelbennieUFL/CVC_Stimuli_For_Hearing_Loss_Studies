@@ -1,0 +1,68 @@
+[
+  {
+    "C1": "D",
+    "C2": "D",
+    "Spelling1": ["DAED", "DEHD", "DIHD"],
+    "Real_Fake_word": ["real", "real", "real"]
+  },
+  {
+    "C1": "D",
+    "C2": "F",
+    "Spelling1": ["DAEF", "DEHF", "DIHF"],
+    "Real_Fake_word": ["fake", "real", "fake"]
+  },
+  {
+    "C1": "D",
+    "C2": "JH",
+    "Spelling1": ["DAEJH", "DEHJH", "DIHJH"],
+    "Real_Fake_word": ["fake", "fake", "fake"]
+  },
+  {
+    "C1": "D",
+    "C2": "SH",
+    "Spelling1": ["DAESH", "DEHSH", "DIHSH"],
+    "Real_Fake_word": ["real", "fake", "real"]
+  },
+  {
+    "C1": "G",
+    "C2": "G",
+    "Spelling1": ["GAEG", "GEHG", "GIHG"],
+    "Real_Fake_word": ["real", "fake", "real"]
+  },
+  {
+    "C1": "G",
+    "C2": "T",
+    "Spelling1": ["GAET", "GEHT", "GIHT"],
+    "Real_Fake_word": ["real", "real", "real"]
+  },
+  {
+    "C1": "G",
+    "C2": "TH",
+    "Spelling1": ["GAETH", "GEHTH", "GIHTH"],
+    "Real_Fake_word": ["fake", "fake", "fake"]
+  },
+  {
+    "C1": "L",
+    "C2": "D",
+    "Spelling1": ["LAED", "LEHD", "LIHD"],
+    "Real_Fake_word": ["real", "real", "real"]
+  },
+  {
+    "C1": "L",
+    "C2": "JH",
+    "Spelling1": ["LAEJH", "LEHJH", "LIHJH"],
+    "Real_Fake_word": ["fake", "real", "fake"]
+  },
+  {
+    "C1": "L",
+    "C2": "P",
+    "Spelling1": ["LAEP", "LEHP", "LIHP"],
+    "Real_Fake_word": ["real", "fake", "real"]
+  },
+  {
+    "C1": "L",
+    "C2": "TH",
+    "Spelling1": ["LAETH", "LEHTH", "LIHTH"],
+    "Real_Fake_word": ["fake", "fake", "fake"]
+  }
+]
