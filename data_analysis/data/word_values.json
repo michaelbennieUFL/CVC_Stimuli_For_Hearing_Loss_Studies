@@ -2,67 +2,375 @@
   {
     "C1": "D",
     "C2": "D",
-    "Spelling1": ["DAED", "DEHD", "DIHD"],
-    "Real_Fake_word": ["real", "real", "real"]
+    "Spelling1": [
+      "DAED",
+      "DEHD",
+      "DIHD"
+    ],
+    "words": {
+      "DAED": {
+        "vowel": "AE",
+        "real_fake": "real",
+        "actual_spelling": "dad",
+        "word_frequency": 3.848585078068932e-05
+      },
+      "DEHD": {
+        "vowel": "EH",
+        "real_fake": "real",
+        "actual_spelling": "dead",
+        "word_frequency": 0.00011403965257646362
+      },
+      "DIHD": {
+        "vowel": "IH",
+        "real_fake": "real",
+        "actual_spelling": "did",
+        "word_frequency": 0.0028843740328561647
+      }
+    },
+    "Real_Fake_word": [
+      "real",
+      "real",
+      "real"
+    ]
   },
   {
     "C1": "D",
     "C2": "F",
-    "Spelling1": ["DAEF", "DEHF", "DIHF"],
-    "Real_Fake_word": ["fake", "real", "fake"]
+    "Spelling1": [
+      "DAEF",
+      "DEHF",
+      "DIHF"
+    ],
+    "words": {
+      "DAEF": {
+        "vowel": "AE",
+        "real_fake": "fake",
+        "actual_spelling": "",
+        "word_frequency": null
+      },
+      "DEHF": {
+        "vowel": "EH",
+        "real_fake": "real",
+        "actual_spelling": "deaf",
+        "word_frequency": 1.3765715811921431e-05
+      },
+      "DIHF": {
+        "vowel": "IH",
+        "real_fake": "fake",
+        "actual_spelling": "",
+        "word_frequency": null
+      }
+    },
+    "Real_Fake_word": [
+      "fake",
+      "real",
+      "fake"
+    ]
   },
   {
     "C1": "D",
     "C2": "JH",
-    "Spelling1": ["DAEJH", "DEHJH", "DIHJH"],
-    "Real_Fake_word": ["fake", "fake", "fake"]
+    "Spelling1": [
+      "DAEJH",
+      "DEHJH",
+      "DIHJH"
+    ],
+    "words": {
+      "DAEJH": {
+        "vowel": "AE",
+        "real_fake": "fake",
+        "actual_spelling": "",
+        "word_frequency": null
+      },
+      "DEHJH": {
+        "vowel": "EH",
+        "real_fake": "fake",
+        "actual_spelling": "",
+        "word_frequency": null
+      },
+      "DIHJH": {
+        "vowel": "IH",
+        "real_fake": "fake",
+        "actual_spelling": "",
+        "word_frequency": null
+      }
+    },
+    "Real_Fake_word": [
+      "fake",
+      "fake",
+      "fake"
+    ]
   },
   {
     "C1": "D",
     "C2": "SH",
-    "Spelling1": ["DAESH", "DEHSH", "DIHSH"],
-    "Real_Fake_word": ["real", "fake", "real"]
+    "Spelling1": [
+      "DAESH",
+      "DEHSH",
+      "DIHSH"
+    ],
+    "words": {
+      "DAESH": {
+        "vowel": "AE",
+        "real_fake": "real",
+        "actual_spelling": "dash",
+        "word_frequency": 4.782961421301287e-06
+      },
+      "DEHSH": {
+        "vowel": "EH",
+        "real_fake": "fake",
+        "actual_spelling": "",
+        "word_frequency": null
+      },
+      "DIHSH": {
+        "vowel": "IH",
+        "real_fake": "real",
+        "actual_spelling": "dish",
+        "word_frequency": 1.5015362494740928e-05
+      }
+    },
+    "Real_Fake_word": [
+      "real",
+      "fake",
+      "real"
+    ]
   },
   {
     "C1": "G",
     "C2": "G",
-    "Spelling1": ["GAEG", "GEHG", "GIHG"],
-    "Real_Fake_word": ["real", "fake", "real"]
+    "Spelling1": [
+      "GAEG",
+      "GEHG",
+      "GIHG"
+    ],
+    "words": {
+      "GAEG": {
+        "vowel": "AE",
+        "real_fake": "real",
+        "actual_spelling": "gag",
+        "word_frequency": 1.2937518598601844e-06
+      },
+      "GEHG": {
+        "vowel": "EH",
+        "real_fake": "fake",
+        "actual_spelling": "",
+        "word_frequency": null
+      },
+      "GIHG": {
+        "vowel": "IH",
+        "real_fake": "real",
+        "actual_spelling": "gig",
+        "word_frequency": 1.3345899867497103e-06
+      }
+    },
+    "Real_Fake_word": [
+      "real",
+      "fake",
+      "real"
+    ]
   },
   {
     "C1": "G",
     "C2": "T",
-    "Spelling1": ["GAET", "GEHT", "GIHT"],
-    "Real_Fake_word": ["real", "real", "real"]
+    "Spelling1": [
+      "GAET",
+      "GEHT",
+      "GIHT"
+    ],
+    "words": {
+      "GAET": {
+        "vowel": "AE",
+        "real_fake": "fake",
+        "actual_spelling": "",
+        "word_frequency": null
+      },
+      "GEHT": {
+        "vowel": "EH",
+        "real_fake": "real",
+        "actual_spelling": "get",
+        "word_frequency": 0.0023727237589702844
+      },
+      "GIHT": {
+        "vowel": "IH",
+        "real_fake": "fake",
+        "actual_spelling": "",
+        "word_frequency": null
+      }
+    },
+    "Real_Fake_word": [
+      "fake",
+      "real",
+      "fake"
+    ]
   },
   {
     "C1": "G",
     "C2": "TH",
-    "Spelling1": ["GAETH", "GEHTH", "GIHTH"],
-    "Real_Fake_word": ["fake", "fake", "fake"]
+    "Spelling1": [
+      "GAETH",
+      "GEHTH",
+      "GIHTH"
+    ],
+    "words": {
+      "GAETH": {
+        "vowel": "AE",
+        "real_fake": "fake",
+        "actual_spelling": "",
+        "word_frequency": null
+      },
+      "GEHTH": {
+        "vowel": "EH",
+        "real_fake": "fake",
+        "actual_spelling": "",
+        "word_frequency": null
+      },
+      "GIHTH": {
+        "vowel": "IH",
+        "real_fake": "fake",
+        "actual_spelling": "",
+        "word_frequency": null
+      }
+    },
+    "Real_Fake_word": [
+      "fake",
+      "fake",
+      "fake"
+    ]
   },
   {
     "C1": "L",
     "C2": "D",
-    "Spelling1": ["LAED", "LEHD", "LIHD"],
-    "Real_Fake_word": ["real", "real", "real"]
+    "Spelling1": [
+      "LAED",
+      "LEHD",
+      "LIHD"
+    ],
+    "words": {
+      "LAED": {
+        "vowel": "AE",
+        "real_fake": "real",
+        "actual_spelling": "lad",
+        "word_frequency": 6.705620435260172e-07
+      },
+      "LEHD": {
+        "vowel": "EH",
+        "real_fake": "real",
+        "actual_spelling": "lead",
+        "word_frequency": 0.0001556479865391261
+      },
+      "LIHD": {
+        "vowel": "IH",
+        "real_fake": "real",
+        "actual_spelling": "lid",
+        "word_frequency": 1.0055163602739096e-05
+      }
+    },
+    "Real_Fake_word": [
+      "real",
+      "real",
+      "real"
+    ]
   },
   {
     "C1": "L",
     "C2": "JH",
-    "Spelling1": ["LAEJH", "LEHJH", "LIHJH"],
-    "Real_Fake_word": ["fake", "real", "fake"]
+    "Spelling1": [
+      "LAEJH",
+      "LEHJH",
+      "LIHJH"
+    ],
+    "words": {
+      "LAEJH": {
+        "vowel": "AE",
+        "real_fake": "fake",
+        "actual_spelling": "",
+        "word_frequency": null
+      },
+      "LEHJH": {
+        "vowel": "EH",
+        "real_fake": "real",
+        "actual_spelling": "ledge",
+        "word_frequency": 2.5826031444936254e-06
+      },
+      "LIHJH": {
+        "vowel": "IH",
+        "real_fake": "fake",
+        "actual_spelling": "",
+        "word_frequency": null
+      }
+    },
+    "Real_Fake_word": [
+      "fake",
+      "real",
+      "fake"
+    ]
   },
   {
     "C1": "L",
     "C2": "P",
-    "Spelling1": ["LAEP", "LEHP", "LIHP"],
-    "Real_Fake_word": ["real", "fake", "real"]
+    "Spelling1": [
+      "LAEP",
+      "LEHP",
+      "LIHP"
+    ],
+    "words": {
+      "LAEP": {
+        "vowel": "AE",
+        "real_fake": "real",
+        "actual_spelling": "lap",
+        "word_frequency": 1.423617103368877e-05
+      },
+      "LEHP": {
+        "vowel": "EH",
+        "real_fake": "fake",
+        "actual_spelling": "",
+        "word_frequency": null
+      },
+      "LIHP": {
+        "vowel": "IH",
+        "real_fake": "real",
+        "actual_spelling": "lip",
+        "word_frequency": 1.3657086394395291e-05
+      }
+    },
+    "Real_Fake_word": [
+      "real",
+      "fake",
+      "real"
+    ]
   },
   {
     "C1": "L",
     "C2": "TH",
-    "Spelling1": ["LAETH", "LEHTH", "LIHTH"],
-    "Real_Fake_word": ["fake", "fake", "fake"]
+    "Spelling1": [
+      "LAETH",
+      "LEHTH",
+      "LIHTH"
+    ],
+    "words": {
+      "LAETH": {
+        "vowel": "AE",
+        "real_fake": "fake",
+        "actual_spelling": "lath",
+        "word_frequency": 2.041906344476301e-08
+      },
+      "LEHTH": {
+        "vowel": "EH",
+        "real_fake": "fake",
+        "actual_spelling": "",
+        "word_frequency": null
+      },
+      "LIHTH": {
+        "vowel": "IH",
+        "real_fake": "fake",
+        "actual_spelling": "",
+        "word_frequency": null
+      }
+    },
+    "Real_Fake_word": [
+      "fake",
+      "fake",
+      "fake"
+    ]
   }
 ]

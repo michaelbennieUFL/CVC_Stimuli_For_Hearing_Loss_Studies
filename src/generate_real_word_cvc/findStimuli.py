@@ -250,13 +250,13 @@ def summarize_c1vc2_input_output_cases(
         middle_mean_freq = sum(inner_freqs) / len(inner_freqs) if inner_freqs else 0.0
 
         original_length=len(Outer_Category_)
-        if outer_left_freq<1.0 and original_length>= 1 :
+        if outer_left_freq<0.01 and original_length>= 1 :
             have.discard(Outer_Category_[0])
             outer_Category_Words[0] = ""
-        if outer_right_freq<1.0 and original_length>= 2 :
+        if outer_right_freq<0.01 and original_length>= 2 :
             have.discard(Outer_Category_[1])
             outer_Category_Words[1]=""
-        if middle_mean_freq<1.0:
+        if middle_mean_freq<0.01:
             have.difference_update(Inner_Category_)
             inner_words=[]
 

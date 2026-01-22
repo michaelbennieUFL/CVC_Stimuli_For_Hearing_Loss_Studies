@@ -234,8 +234,24 @@ df["FullFusion_EH"] = (
     & (df["Ans1V"].apply(clean_str) == "EH")
 ).astype(int)
 
-# Run both analyses
+
+# ====================================================
+# DV 3: Any fusion
+#  - total fusion (EH-only) OR
+#  - OneType==1 but not BothOK==1
+# ====================================================
+df["OneType_num"] = pd.to_numeric(df["OneType"], errors="coerce").fillna(0).astype(int)
+df["BothOK_num"] = pd.to_numeric(df["BothOK"], errors="coerce").fillna(0).astype(int)
+
+df["AnyFusion"] = (
+    (df["FullFusion_EH"] == 1)
+    | ((df["OneType_num"] == 1) & (df["BothOK_num"] != 1))
+).astype(int)
+
+# Run all analyses
 run_all("Ans1_only", "Ans1V-only (Ans2V & Ans3V missing)", suffix="")
 run_all("FullFusion_EH", "Full fusion (EH): Ans1V-only AND Ans1V == EH", suffix="_fullfusion_EH")
+run_all("AnyFusion", "Any fusion: FullFusion_EH OR (OneType==1 & BothOK!=1)", suffix="_anyfusion")
+
 
 print("Markdown ANOVA + post-hoc tables written to ./analysis/ (including fullfusion_EH)")
